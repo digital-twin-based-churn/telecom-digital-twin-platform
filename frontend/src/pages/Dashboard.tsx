@@ -92,9 +92,9 @@ const Dashboard = () => {
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8 animate-fade-up">
-          <h1 className="text-3xl font-bold mb-2">Digital Twin Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2">Dijital İkiz Kontrol Paneli</h1>
           <p className="text-muted-foreground">
-            Real-time insights from your customer digital twins and churn prevention system
+            Müşteri dijital ikizleriniz ve kayıp önleme sisteminizden gerçek zamanlı içgörüler
           </p>
         </div>
 
@@ -102,52 +102,52 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="neural-border animate-scale-in" style={{ animationDelay: '0.1s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Digital Twins</CardTitle>
+              <CardTitle className="text-sm font-medium">Aktif Dijital İkizler</CardTitle>
               <Bot className="h-4 w-4 text-neural" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">24,571</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-success font-medium">+12%</span> from last month
+                <span className="text-success font-medium">+12%</span> geçen aydan beri
               </p>
             </CardContent>
           </Card>
 
           <Card className="data-border animate-scale-in" style={{ animationDelay: '0.2s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Churn Risk Score</CardTitle>
+              <CardTitle className="text-sm font-medium">Kayıp Risk Skoru</CardTitle>
               <AlertTriangle className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">23.4%</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-success font-medium">-5.2%</span> from last month
+                <span className="text-success font-medium">-5.2%</span> geçen aydan beri
               </p>
             </CardContent>
           </Card>
 
           <Card className="hover-lift animate-scale-in" style={{ animationDelay: '0.3s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Customers Retained</CardTitle>
+              <CardTitle className="text-sm font-medium">Elde Tutulan Müşteriler</CardTitle>
               <Users className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">1,847</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-success font-medium">+18%</span> this quarter
+                <span className="text-success font-medium">+18%</span> bu çeyrekte
               </p>
             </CardContent>
           </Card>
 
           <Card className="hover-lift animate-scale-in" style={{ animationDelay: '0.4s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revenue Protected</CardTitle>
+              <CardTitle className="text-sm font-medium">Korunan Gelir</CardTitle>
               <Shield className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">$2.8M</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-success font-medium">+24%</span> this quarter
+                <span className="text-success font-medium">+24%</span> bu çeyrekte
               </p>
             </CardContent>
           </Card>
@@ -159,23 +159,23 @@ const Dashboard = () => {
             {/* Churn Prediction Overview */}
             <Card className="animate-fade-up">
               <CardHeader>
-                <CardTitle>Churn Prediction Overview</CardTitle>
+                <CardTitle>Kayıp Tahmin Özeti</CardTitle>
                 <CardDescription>
-                  Real-time analysis of customer churn risk across segments
+                  Segmentler arası müşteri kayıp riskinin gerçek zamanlı analizi
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">High Risk Customers</p>
+                      <p className="text-sm font-medium">Yüksek Riskli Müşteriler</p>
                       <p className="text-sm text-muted-foreground">
-                        Churn probability &gt; 70%
+                        Kayıp olasılığı &gt; %70
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-destructive">847</p>
-                      <Badge variant="destructive" className="text-xs">High Priority</Badge>
+                      <Badge variant="destructive" className="text-xs">Yüksek Öncelik</Badge>
                     </div>
                   </div>
                   <Progress value={34} className="h-2" />
@@ -184,12 +184,12 @@ const Dashboard = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">Medium Risk Customers</p>
-                      <p className="text-xs text-muted-foreground">Churn probability 40-70%</p>
+                      <p className="text-sm font-medium">Orta Riskli Müşteriler</p>
+                      <p className="text-xs text-muted-foreground">Kayıp olasılığı %40-70</p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-warning">2,341</p>
-                      <Badge variant="secondary" className="text-xs">Monitor</Badge>
+                      <Badge variant="secondary" className="text-xs">İzleniyor</Badge>
                     </div>
                   </div>
                   <Progress value={58} className="h-2" />
@@ -198,14 +198,14 @@ const Dashboard = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">Low Risk Customers</p>
+                      <p className="text-sm font-medium">Düşük Riskli Müşteriler</p>
                       <p className="text-sm text-muted-foreground">
-                        Churn probability &lt; 40%
+                        Kayıp olasılığı &lt; %40
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-success">21,383</p>
-                      <Badge className="text-xs bg-success text-success-foreground">Stable</Badge>
+                      <Badge className="text-xs bg-success text-success-foreground">Kararlı</Badge>
                     </div>
                   </div>
                   <Progress value={87} className="h-2" />
@@ -216,9 +216,9 @@ const Dashboard = () => {
             {/* Recent Digital Twin Insights */}
             <Card className="animate-fade-up" style={{ animationDelay: '0.2s' }}>
               <CardHeader>
-                <CardTitle>Recent Digital Twin Insights</CardTitle>
+                <CardTitle>Son Dijital İkiz İçgörüleri</CardTitle>
                 <CardDescription>
-                  Latest behavioral patterns detected by your digital twins
+                  Dijital ikizleriniz tarafından tespit edilen en son davranış kalıpları
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -226,42 +226,42 @@ const Dashboard = () => {
                   <div className="flex items-start space-x-4 p-4 rounded-lg neural-border">
                     <div className="w-2 h-2 rounded-full bg-destructive mt-2"></div>
                     <div className="flex-1">
-                      <p className="font-medium">Customer ID: 78291</p>
+                      <p className="font-medium">Müşteri ID: 78291</p>
                       <p className="text-sm text-muted-foreground">
-                        Digital twin detected 67% decrease in service usage. Predicted churn in 14 days.
+                        Dijital ikiz hizmet kullanımında %67 düşüş tespit etti. 14 gün içinde kayıp tahmini.
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">2 hours ago</p>
+                      <p className="text-xs text-muted-foreground mt-1">2 saat önce</p>
                     </div>
                     <Button variant="outline" size="sm">
-                      View Details
+                      Detaylar
                     </Button>
                   </div>
 
                   <div className="flex items-start space-x-4 p-4 rounded-lg data-border">
                     <div className="w-2 h-2 rounded-full bg-warning mt-2"></div>
                     <div className="flex-1">
-                      <p className="font-medium">Customer Segment: Premium</p>
+                      <p className="font-medium">Müşteri Segmenti: Premium</p>
                       <p className="text-sm text-muted-foreground">
-                        Multiple twins showing reduced engagement. Recommending targeted campaign.
+                        Birden fazla ikiz azalan etkileşim gösteriyor. Hedefli kampanya öneriliyor.
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">4 hours ago</p>
+                      <p className="text-xs text-muted-foreground mt-1">4 saat önce</p>
                     </div>
                     <Button variant="outline" size="sm">
-                      View Campaign
+                      Kampanya Görüntüle
                     </Button>
                   </div>
 
                   <div className="flex items-start space-x-4 p-4 rounded-lg bg-success/10 border border-success/20">
                     <div className="w-2 h-2 rounded-full bg-success mt-2"></div>
                     <div className="flex-1">
-                      <p className="font-medium">Retention Campaign Success</p>
+                      <p className="font-medium">Elde Tutma Kampanyası Başarılı</p>
                       <p className="text-sm text-muted-foreground">
-                        Digital twin simulation correctly predicted 89% campaign success rate.
+                        Dijital ikiz simülasyonu %89 kampanya başarı oranını doğru tahmin etti.
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">1 day ago</p>
+                      <p className="text-xs text-muted-foreground mt-1">1 gün önce</p>
                     </div>
                     <Button variant="outline" size="sm">
-                      View Results
+                      Sonuçlar
                     </Button>
                   </div>
                 </div>
@@ -274,25 +274,25 @@ const Dashboard = () => {
             {/* Quick Actions */}
             <Card className="animate-slide-in-right">
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>Hızlı İşlemler</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Link to="/simulation" className="block">
                   <Button variant="neural" className="w-full justify-start">
                     <Play className="w-4 h-4 mr-2" />
-                    Run Simulation
+                    Simülasyon Çalıştır
                   </Button>
                 </Link>
                 <Link to="/chatbot" className="block">
                   <Button variant="data" className="w-full justify-start">
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    AI Assistant
+                    AI Asistan
                   </Button>
                 </Link>
                 <Link to="/statistics" className="block">
                   <Button variant="outline" className="w-full justify-start">
                     <BarChart3 className="w-4 h-4 mr-2" />
-                    View Analytics
+                    Analitikleri Görüntüle
                   </Button>
                 </Link>
               </CardContent>
@@ -301,24 +301,24 @@ const Dashboard = () => {
             {/* System Status */}
             <Card className="animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
               <CardHeader>
-                <CardTitle>System Status</CardTitle>
+                <CardTitle>Sistem Durumu</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Digital Twin Engine</span>
-                  <Badge className="bg-success text-success-foreground">Operational</Badge>
+                  <span className="text-sm">Dijital İkiz Motoru</span>
+                  <Badge className="bg-success text-success-foreground">Çalışıyor</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">ML Models</span>
-                  <Badge className="bg-success text-success-foreground">Active</Badge>
+                  <span className="text-sm">ML Modelleri</span>
+                  <Badge className="bg-success text-success-foreground">Aktif</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Data Pipeline</span>
-                  <Badge className="bg-success text-success-foreground">Streaming</Badge>
+                  <span className="text-sm">Veri Hattı</span>
+                  <Badge className="bg-success text-success-foreground">Akışta</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">API Services</span>
-                  <Badge className="bg-success text-success-foreground">Healthy</Badge>
+                  <span className="text-sm">API Servisleri</span>
+                  <Badge className="bg-success text-success-foreground">Sağlıklı</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -326,26 +326,26 @@ const Dashboard = () => {
             {/* Performance Metrics */}
             <Card className="animate-slide-in-right" style={{ animationDelay: '0.4s' }}>
               <CardHeader>
-                <CardTitle>Today's Performance</CardTitle>
+                <CardTitle>Bugünün Performansı</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Model Accuracy</span>
+                    <span>Model Doğruluğu</span>
                     <span className="font-medium">94.2%</span>
                   </div>
                   <Progress value={94} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Prediction Confidence</span>
+                    <span>Tahmin Güvenilirliği</span>
                     <span className="font-medium">87.8%</span>
                   </div>
                   <Progress value={88} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Data Processing</span>
+                    <span>Veri İşleme</span>
                     <span className="font-medium">99.1%</span>
                   </div>
                   <Progress value={99} className="h-2" />

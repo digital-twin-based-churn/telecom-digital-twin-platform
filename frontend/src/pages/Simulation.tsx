@@ -73,37 +73,37 @@ const Simulation = () => {
               <Link to="/">
                 <Button variant="ghost" size="sm">
                   <Home className="w-4 h-4 mr-2" />
-                  Home
+                  Ana Sayfa
                 </Button>
               </Link>
               <Link to="/dashboard">
                 <Button variant="ghost" size="sm">
                   <BarChart3 className="w-4 h-4 mr-2" />
-                  Dashboard
+                  Panel
                 </Button>
               </Link>
               <Link to="/statistics">
                 <Button variant="ghost" size="sm">
                   <PieChart className="w-4 h-4 mr-2" />
-                  Analytics
+                  Analitik
                 </Button>
               </Link>
               <Link to="/chatbot">
                 <Button variant="ghost" size="sm">
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  AI Assistant
+                  AI Asistan
                 </Button>
               </Link>
               <Button variant="ghost" size="sm" className="bg-muted">
                 <Play className="w-4 h-4 mr-2" />
-                Simulation
+                Simülasyon
               </Button>
             </div>
           </div>
 
           <div className="flex items-center space-x-4">
             <ThemeToggle />
-            <Button variant="outline" size="sm">Export Results</Button>
+            <Button variant="outline" size="sm">Sonuçları Dışa Aktar</Button>
           </div>
         </div>
       </nav>
@@ -111,9 +111,9 @@ const Simulation = () => {
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8 animate-fade-up">
-          <h1 className="text-3xl font-bold mb-2">Digital Twin Simulation</h1>
+          <h1 className="text-3xl font-bold mb-2">Dijital İkiz Simülasyonu</h1>
           <p className="text-muted-foreground">
-            Test marketing strategies and retention campaigns on digital twins before real customer deployment
+            Gerçek müşterilere uygulamadan önce dijital ikizler üzerinde pazarlama stratejilerini ve elde tutma kampanyalarını test edin
           </p>
         </div>
 
@@ -125,59 +125,59 @@ const Simulation = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Settings className="w-5 h-5" />
-                  <span>Simulation Configuration</span>
+                  <span>Simülasyon Yapılandırması</span>
                 </CardTitle>
                 <CardDescription>
-                  Configure your digital twin simulation parameters
+                  Dijital ikiz simülasyon parametrelerinizi yapılandırın
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="customer-segment">Customer Segment</Label>
+                      <Label htmlFor="customer-segment">Müşteri Segmenti</Label>
                       <Select>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select segment" />
+                          <SelectValue placeholder="Segment seçin" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="premium">Premium Customers</SelectItem>
-                          <SelectItem value="standard">Standard Customers</SelectItem>
-                          <SelectItem value="basic">Basic Customers</SelectItem>
-                          <SelectItem value="all">All Customers</SelectItem>
+                          <SelectItem value="premium">Premium Müşteriler</SelectItem>
+                          <SelectItem value="standard">Standart Müşteriler</SelectItem>
+                          <SelectItem value="basic">Temel Müşteriler</SelectItem>
+                          <SelectItem value="all">Tüm Müşteriler</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <Label htmlFor="campaign-type">Campaign Type</Label>
+                      <Label htmlFor="campaign-type">Kampanya Tipi</Label>
                       <Select>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select campaign" />
+                          <SelectValue placeholder="Kampanya seçin" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="discount">Discount Offer</SelectItem>
-                          <SelectItem value="upgrade">Service Upgrade</SelectItem>
-                          <SelectItem value="retention">Retention Call</SelectItem>
-                          <SelectItem value="email">Email Campaign</SelectItem>
+                          <SelectItem value="discount">İndirim Teklifi</SelectItem>
+                          <SelectItem value="upgrade">Hizmet Yükseltme</SelectItem>
+                          <SelectItem value="retention">Elde Tutma Araması</SelectItem>
+                          <SelectItem value="email">E-posta Kampanyası</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <Label htmlFor="sample-size">Sample Size</Label>
+                      <Label htmlFor="sample-size">Örnek Boyutu</Label>
                       <Input type="number" placeholder="5000" defaultValue="5000" />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="time-horizon">Time Horizon (days)</Label>
+                      <Label htmlFor="time-horizon">Zaman Ufku (gün)</Label>
                       <Input type="number" placeholder="90" defaultValue="90" />
                     </div>
 
                     <div>
-                      <Label htmlFor="confidence-level">Confidence Level</Label>
+                      <Label htmlFor="confidence-level">Güven Seviyesi</Label>
                       <Select>
                         <SelectTrigger>
                           <SelectValue placeholder="95%" />
@@ -191,7 +191,7 @@ const Simulation = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="simulation-runs">Simulation Runs</Label>
+                      <Label htmlFor="simulation-runs">Simülasyon Çalıştırma Sayısı</Label>
                       <Input type="number" placeholder="1000" defaultValue="1000" />
                     </div>
                   </div>
@@ -208,18 +208,18 @@ const Simulation = () => {
                     {isRunning ? (
                       <>
                         <Clock className="w-4 h-4 animate-spin" />
-                        <span>Running Simulation...</span>
+                        <span>Simülasyon Çalışıyor...</span>
                       </>
                     ) : (
                       <>
                         <Play className="w-4 h-4" />
-                        <span>Run Simulation</span>
+                        <span>Simülasyonu Başlat</span>
                       </>
                     )}
                   </Button>
                   
                   <Button variant="outline" disabled={isRunning}>
-                    Reset Parameters
+                    Parametreleri Sıfırla
                   </Button>
                 </div>
 
@@ -227,7 +227,7 @@ const Simulation = () => {
                 {isRunning && (
                   <div className="space-y-2 animate-fade-in">
                     <div className="flex justify-between text-sm">
-                      <span>Processing digital twins...</span>
+                      <span>Dijital ikizler işleniyor...</span>
                       <span>{progress}%</span>
                     </div>
                     <Progress value={progress} className="h-2" />
@@ -242,10 +242,10 @@ const Simulation = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <CheckCircle className="w-5 h-5 text-success" />
-                    <span>Simulation Results</span>
+                    <span>Simülasyon Sonuçları</span>
                   </CardTitle>
                   <CardDescription>
-                    Digital twin simulation completed successfully
+                    Dijital ikiz simülasyonu başarıyla tamamlandı
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -253,7 +253,7 @@ const Simulation = () => {
                     <div className="space-y-4">
                       <div className="p-4 rounded-lg neural-border">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Total Customers Analyzed</span>
+                          <span className="text-sm font-medium">Analiz Edilen Toplam Müşteri</span>
                           <Target className="w-4 h-4 text-neural" />
                         </div>
                         <p className="text-2xl font-bold">{simulationResults.totalCustomers.toLocaleString()}</p>
@@ -261,62 +261,62 @@ const Simulation = () => {
 
                       <div className="p-4 rounded-lg data-border">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Predicted Churners</span>
+                          <span className="text-sm font-medium">Tahmin Edilen Kayıplar</span>
                           <AlertCircle className="w-4 h-4 text-warning" />
                         </div>
                         <p className="text-2xl font-bold text-warning">{simulationResults.predictedChurners.toLocaleString()}</p>
                         <p className="text-xs text-muted-foreground">
-                          {((simulationResults.predictedChurners / simulationResults.totalCustomers) * 100).toFixed(1)}% of total
+                          toplam müşterinin %{((simulationResults.predictedChurners / simulationResults.totalCustomers) * 100).toFixed(1)}'i
                         </p>
                       </div>
 
                       <div className="p-4 rounded-lg bg-success/10 border border-success/20">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Expected Retention Rate</span>
+                          <span className="text-sm font-medium">Beklenen Elde Tutma Oranı</span>
                           <TrendingUp className="w-4 h-4 text-success" />
                         </div>
-                        <p className="text-2xl font-bold text-success">{simulationResults.retentionRate}%</p>
-                        <p className="text-xs text-muted-foreground">+18.3% improvement</p>
+                        <p className="text-2xl font-bold text-success">%{simulationResults.retentionRate}</p>
+                        <p className="text-xs text-muted-foreground">+%18.3 iyileşme</p>
                       </div>
                     </div>
 
                     <div className="space-y-4">
                       <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Campaign Effectiveness</span>
+                          <span className="text-sm font-medium">Kampanya Etkinliği</span>
                           <Zap className="w-4 h-4 text-primary" />
                         </div>
-                        <p className="text-2xl font-bold text-primary">{simulationResults.campaignEffectiveness}%</p>
-                        <p className="text-xs text-muted-foreground">Success probability</p>
+                        <p className="text-2xl font-bold text-primary">%{simulationResults.campaignEffectiveness}</p>
+                        <p className="text-xs text-muted-foreground">Başarı olasılığı</p>
                       </div>
 
                       <div className="p-4 rounded-lg bg-accent/10 border border-accent/20">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Revenue Protected</span>
+                          <span className="text-sm font-medium">Korunan Gelir</span>
                           <span className="text-lg">💰</span>
                         </div>
                         <p className="text-2xl font-bold text-accent">${simulationResults.revenueProtected}M</p>
-                        <p className="text-xs text-muted-foreground">Estimated monthly impact</p>
+                        <p className="text-xs text-muted-foreground">Tahmini aylık etki</p>
                       </div>
 
                       <div className="p-4 rounded-lg bg-muted/50 border">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Confidence Level</span>
+                          <span className="text-sm font-medium">Güven Seviyesi</span>
                           <CheckCircle className="w-4 h-4 text-success" />
                         </div>
-                        <p className="text-2xl font-bold">{simulationResults.confidence}%</p>
-                        <p className="text-xs text-muted-foreground">Statistical confidence</p>
+                        <p className="text-2xl font-bold">%{simulationResults.confidence}</p>
+                        <p className="text-xs text-muted-foreground">İstatistiksel güven</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-6 p-4 rounded-lg bg-neural/5 border border-neural/20">
-                    <h4 className="font-semibold mb-3 text-neural">Digital Twin Insights</h4>
+                    <h4 className="font-semibold mb-3 text-neural">Dijital İkiz İçgörüleri</h4>
                     <div className="space-y-2 text-sm">
-                      <p>• High-value customers show 67% higher retention rate with personalized offers</p>
-                      <p>• Digital twins predict optimal campaign timing: 2-3 weeks before predicted churn</p>
-                      <p>• Combined email + discount approach shows highest effectiveness (89.2%)</p>
-                      <p>• Customer segments with high support interaction respond better to retention calls</p>
+                      <p>• Yüksek değerli müşteriler kişiselleştirilmiş tekliflerle %67 daha yüksek elde tutma oranı gösteriyor</p>
+                      <p>• Dijital ikizler optimal kampanya zamanlamasını tahmin ediyor: tahmin edilen kayıptan 2-3 hafta önce</p>
+                      <p>• E-posta + indirim kombinasyonu en yüksek etkinliği gösteriyor (%89.2)</p>
+                      <p>• Yüksek destek etkileşimli müşteri segmentleri elde tutma aramalarına daha iyi yanıt veriyor</p>
                     </div>
                   </div>
                 </CardContent>
@@ -329,33 +329,33 @@ const Simulation = () => {
             {/* Simulation History */}
             <Card className="animate-slide-in-right">
               <CardHeader>
-                <CardTitle>Recent Simulations</CardTitle>
+                <CardTitle>Son Simülasyonlar</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start space-x-3 p-3 rounded-lg bg-success/10 border border-success/20">
                   <CheckCircle className="w-4 h-4 text-success mt-0.5" />
                   <div>
-                    <p className="font-medium text-sm">Premium Discount Campaign</p>
-                    <p className="text-xs text-muted-foreground">89.2% success rate</p>
-                    <p className="text-xs text-muted-foreground">2 hours ago</p>
+                    <p className="font-medium text-sm">Premium İndirim Kampanyası</p>
+                    <p className="text-xs text-muted-foreground">%89.2 başarı oranı</p>
+                    <p className="text-xs text-muted-foreground">2 saat önce</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3 p-3 rounded-lg bg-success/10 border border-success/20">
                   <CheckCircle className="w-4 h-4 text-success mt-0.5" />
                   <div>
-                    <p className="font-medium text-sm">Service Upgrade Strategy</p>
-                    <p className="text-xs text-muted-foreground">76.8% success rate</p>
-                    <p className="text-xs text-muted-foreground">1 day ago</p>
+                    <p className="font-medium text-sm">Hizmet Yükseltme Stratejisi</p>
+                    <p className="text-xs text-muted-foreground">%76.8 başarı oranı</p>
+                    <p className="text-xs text-muted-foreground">1 gün önce</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
                   <AlertCircle className="w-4 h-4 text-warning mt-0.5" />
                   <div>
-                    <p className="font-medium text-sm">Email Campaign Test</p>
-                    <p className="text-xs text-muted-foreground">54.3% success rate</p>
-                    <p className="text-xs text-muted-foreground">3 days ago</p>
+                    <p className="font-medium text-sm">E-posta Kampanyası Testi</p>
+                    <p className="text-xs text-muted-foreground">%54.3 başarı oranı</p>
+                    <p className="text-xs text-muted-foreground">3 gün önce</p>
                   </div>
                 </div>
               </CardContent>
@@ -364,29 +364,29 @@ const Simulation = () => {
             {/* System Resources */}
             <Card className="animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
               <CardHeader>
-                <CardTitle>System Resources</CardTitle>
+                <CardTitle>Sistem Kaynakları</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Digital Twin Models</span>
-                    <span className="font-medium">24,571 active</span>
+                    <span>Dijital İkiz Modelleri</span>
+                    <span className="font-medium">24,571 aktif</span>
                   </div>
                   <Progress value={87} className="h-2" />
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Simulation Capacity</span>
-                    <span className="font-medium">73% available</span>
+                    <span>Simülasyon Kapasitesi</span>
+                    <span className="font-medium">%73 müsait</span>
                   </div>
                   <Progress value={27} className="h-2" />
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Processing Queue</span>
-                    <span className="font-medium">12 pending</span>
+                    <span>İşlem Kuyruğu</span>
+                    <span className="font-medium">12 bekliyor</span>
                   </div>
                   <Progress value={15} className="h-2" />
                 </div>
@@ -396,22 +396,22 @@ const Simulation = () => {
             {/* Best Practices */}
             <Card className="animate-slide-in-right" style={{ animationDelay: '0.4s' }}>
               <CardHeader>
-                <CardTitle>Simulation Tips</CardTitle>
+                <CardTitle>Simülasyon İpuçları</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="p-3 rounded-lg bg-neural/10 border border-neural/20">
-                  <p className="font-medium text-neural">Sample Size</p>
-                  <p className="text-muted-foreground">Use at least 1,000 customers for reliable results</p>
+                  <p className="font-medium text-neural">Örnek Boyutu</p>
+                  <p className="text-muted-foreground">Güvenilir sonuçlar için en az 1.000 müşteri kullanın</p>
                 </div>
 
                 <div className="p-3 rounded-lg bg-data/10 border border-data/20">
-                  <p className="font-medium text-data">Time Horizon</p>
-                  <p className="text-muted-foreground">90-day periods provide optimal prediction accuracy</p>
+                  <p className="font-medium text-data">Zaman Ufku</p>
+                  <p className="text-muted-foreground">90 günlük periyotlar optimal tahmin doğruluğu sağlar</p>
                 </div>
 
                 <div className="p-3 rounded-lg bg-success/10 border border-success/20">
-                  <p className="font-medium text-success">Confidence Level</p>
-                  <p className="text-muted-foreground">95% confidence recommended for business decisions</p>
+                  <p className="font-medium text-success">Güven Seviyesi</p>
+                  <p className="text-muted-foreground">İş kararları için %95 güven önerilir</p>
                 </div>
               </CardContent>
             </Card>
