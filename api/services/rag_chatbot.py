@@ -176,8 +176,13 @@ class RAGChatbot:
             message_lower = message.lower()
             is_campaign_query = any(word in message_lower for word in ["kampanya", "karşılaştır", "paket", "tarife", "fiyat"])
             
-            # Use LIVE SCRAPING for campaign queries - ALWAYS use scraping for campaigns
-            if is_campaign_query and get_live_campaigns is not None:
+            # HIZLI MOD: Scraping sadece TABLO istediğinde (yavaş çünkü 3 site taranıyor)
+            # Normal sorgularda sadece Tavily web search kullan (çok hızlı)
+            needs_live_scraping = any(word in message_lower for word in ["tablo", "karşılaştır", "karşılaştırma"]) and \
+                                  any(word in message_lower for word in ["turkcell", "vodafone", "türk telekom"])
+            
+            # Use LIVE SCRAPING only for explicit table comparisons (slow but accurate)
+            if needs_live_scraping and get_live_campaigns is not None:
                 logger.info("=" * 80)
                 logger.info("🔍 LIVE SCRAPING BAŞLATILIYOR!")
                 logger.info("=" * 80)
@@ -213,9 +218,10 @@ class RAGChatbot:
                     logger.warning(f"get_live_campaigns type: {type(get_live_campaigns)}")
             
             # Fallback to web search if scraping failed or not a campaign query
+            # HIZLI MOD: Daha az sonuç = daha hızlı yanıt
             if needs_web_search and not scraped_campaigns and self.tavily_client and self.llm:
-                logger.info("Performing web search for current information")
-                web_results = self.search_web(message, max_results=5)
+                logger.info("⚡ HIZLI WEB ARAMA yapılıyor...")
+                web_results = self.search_web(message, max_results=3)  # 5->3 hızlandırma
             
             # Simple response generation
             if self.llm:
@@ -239,9 +245,10 @@ class RAGChatbot:
                     
                     # Priority 2: Use web search results (fallback)
                     elif web_results:
-                        web_context = "\n\nGüncel Web Arama Sonuçları:\n"
+                        web_context = "\n\n⚡ Hızlı Web Arama Sonuçları:\n"
                         for i, result in enumerate(web_results, 1):
-                            web_context += f"{i}. {result['title']}\n   {result['content'][:200]}...\n   Kaynak: {result['url']}\n\n"
+                            # HIZLI MOD: Daha kısa snippet (200->120)
+                            web_context += f"{i}. {result['title']}\n   {result['content'][:120]}...\n   Kaynak: {result['url']}\n\n"
                     
                     # Basit selamlaşma kontrolü
                     is_greeting = any(word in message.lower() for word in ["merhaba", "selam", "hello", "hi", "hey"])
@@ -345,25 +352,27 @@ class RAGChatbot:
                         Kullanıcı sorusu: {message}
                         {web_context}
                         
-                        KURALLAR:
-                        1. Kısa ve öz yanıt ver (maksimum 300 kelime)
-                        2. Basit sorulara basit yanıt ver
-                        3. Gereksiz detaya girme, sadece sorulan şeyi yanıtla
+                        HIZLI YANIT KURALLARI:
+                        1. ÇOK KISA yanıt ver (maksimum 150 kelime)
+                        2. Madde madde yanıtla (•)
+                        3. Gereksiz açıklama yapma
+                        4. Direkt cevabı ver
                         """
                     
                     # Use Google Gemini to generate response with token limit
+                    # HIZLI MOD: Daha düşük token limitleri
                     if is_greeting:
-                        max_tokens = 500  # Selamlaşma kısa
+                        max_tokens = 300  # Selamlaşma çok kısa
                     elif needs_table:
-                        max_tokens = 1500  # Tablo için daha fazla
+                        max_tokens = 1200  # Tablo için yeterli
                     else:
-                        max_tokens = 1000  # Normal sorular
+                        max_tokens = 600  # Normal sorular hızlı
                     
                     response = self.llm.generate_content(
                         telecom_prompt,
                         generation_config=genai.types.GenerationConfig(
                             max_output_tokens=max_tokens,
-                            temperature=0.7,
+                            temperature=0.5,  # Düşürüldü: daha hızlı, daha tutarlı yanıt
                         )
                     )
                     return response.text if response.text else "Üzgünüm, yanıt oluşturulamadı."
@@ -468,10 +477,10 @@ class RAGChatbot:
             if any(word in query.lower() for word in ["kampanya", "fiyat", "tarife"]):
                 enhanced_query = f"{query} fiyat ücret 2025"
             
-            # Perform web search with advanced depth for better results
+            # Perform web search - HIZLI MOD: basic depth (advanced çok yavaş)
             search_results = self.tavily_client.search(
                 query=enhanced_query,
-                search_depth="advanced",  # Changed from basic to advanced
+                search_depth="basic",  # HIZLI: basic yerine advanced kullanma
                 max_results=max_results,
                 include_answer=True,
                 include_raw_content=False
