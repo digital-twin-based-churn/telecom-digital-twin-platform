@@ -138,7 +138,11 @@ app.add_middleware(
     max_age=3600,
 )
 
-# CORS is handled by CORSMiddleware above - no need for additional middleware
+# Handle OPTIONS requests for CORS preflight
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    """Handle all OPTIONS requests for CORS preflight"""
+    return {}
 
 @app.get("/")
 async def root():
