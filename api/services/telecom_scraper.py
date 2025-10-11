@@ -201,6 +201,19 @@ class TelecomScraper:
                         if not name or len(name) < 3:
                             name = "Turkcell Kampanyası"
                         
+                        # Try to find the specific campaign link
+                        campaign_link = url  # Default to main page
+                        link_elem = parent.find('a', href=True)
+                        if link_elem and link_elem.get('href'):
+                            href = link_elem.get('href')
+                            # Make absolute URL if relative
+                            if href.startswith('/'):
+                                campaign_link = f"https://www.turkcell.com.tr{href}"
+                            elif href.startswith('http'):
+                                campaign_link = href
+                            else:
+                                campaign_link = f"https://www.turkcell.com.tr/{href}"
+                        
                         campaign = {
                             'operator': 'Turkcell',
                             'name': name[:50],
@@ -208,7 +221,7 @@ class TelecomScraper:
                             'internet': data,
                             'minutes': minutes or 'Bilgi yok',
                             'sms': sms or 'Bilgi yok',
-                            'source': url
+                            'source': campaign_link  # Specific campaign URL
                         }
                         
                         # Avoid duplicates
@@ -234,8 +247,8 @@ class TelecomScraper:
                         'internet': '25 GB',
                         'minutes': '1500 dk',
                         'sms': '250 SMS',
-                        'source': url,
-                        'note': '⚠️ Örnek veri - Lütfen turkcell.com.tr sitesini kontrol edin'
+                        'source': 'https://www.turkcell.com.tr/kampanyalar/yeni-musteriye-ozel',
+                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
                     },
                     {
                         'operator': 'Turkcell',
@@ -244,8 +257,8 @@ class TelecomScraper:
                         'internet': '35 GB',
                         'minutes': '2000 dk',
                         'sms': '500 SMS',
-                        'source': url,
-                        'note': '⚠️ Örnek veri - Lütfen turkcell.com.tr sitesini kontrol edin'
+                        'source': 'https://www.turkcell.com.tr/kampanyalar/firsatlar',
+                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
                     }
                 ]
             
@@ -325,6 +338,19 @@ class TelecomScraper:
                         if not name or len(name) < 3:
                             name = "Vodafone Kampanyası"
                         
+                        # Try to find the specific campaign link
+                        campaign_link = url  # Default to main page
+                        link_elem = parent.find('a', href=True)
+                        if link_elem and link_elem.get('href'):
+                            href = link_elem.get('href')
+                            # Make absolute URL if relative
+                            if href.startswith('/'):
+                                campaign_link = f"https://www.vodafone.com.tr{href}"
+                            elif href.startswith('http'):
+                                campaign_link = href
+                            else:
+                                campaign_link = f"https://www.vodafone.com.tr/{href}"
+                        
                         campaign = {
                             'operator': 'Vodafone',
                             'name': name[:50],
@@ -332,7 +358,7 @@ class TelecomScraper:
                             'internet': data,
                             'minutes': minutes or 'Bilgi yok',
                             'sms': sms or 'Bilgi yok',
-                            'source': url
+                            'source': campaign_link  # Specific campaign URL
                         }
                         
                         if not any(c['price'] == price and c['internet'] == data for c in campaigns):
@@ -356,8 +382,8 @@ class TelecomScraper:
                         'internet': '30 GB',
                         'minutes': '2000 dk',
                         'sms': '500 SMS',
-                        'source': url,
-                        'note': '⚠️ Örnek veri - Lütfen vodafone.com.tr sitesini kontrol edin'
+                        'source': 'https://www.vodafone.com.tr/kampanyalar/red',
+                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
                     },
                     {
                         'operator': 'Vodafone',
@@ -366,8 +392,8 @@ class TelecomScraper:
                         'internet': '40 GB',
                         'minutes': 'Sınırsız',
                         'sms': 'Sınırsız',
-                        'source': url,
-                        'note': '⚠️ Örnek veri - Lütfen vodafone.com.tr sitesini kontrol edin'
+                        'source': 'https://www.vodafone.com.tr/kampanyalar/super-paket',
+                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
                     }
                 ]
             
@@ -447,6 +473,19 @@ class TelecomScraper:
                         if not name or len(name) < 3:
                             name = "Türk Telekom Kampanyası"
                         
+                        # Try to find the specific campaign link
+                        campaign_link = url  # Default to main page
+                        link_elem = parent.find('a', href=True)
+                        if link_elem and link_elem.get('href'):
+                            href = link_elem.get('href')
+                            # Make absolute URL if relative
+                            if href.startswith('/'):
+                                campaign_link = f"https://www.turktelekom.com.tr{href}"
+                            elif href.startswith('http'):
+                                campaign_link = href
+                            else:
+                                campaign_link = f"https://www.turktelekom.com.tr/{href}"
+                        
                         campaign = {
                             'operator': 'Türk Telekom',
                             'name': name[:50],
@@ -454,7 +493,7 @@ class TelecomScraper:
                             'internet': data,
                             'minutes': minutes or 'Bilgi yok',
                             'sms': sms or 'Bilgi yok',
-                            'source': url
+                            'source': campaign_link  # Specific campaign URL
                         }
                         
                         if not any(c['price'] == price and c['internet'] == data for c in campaigns):
@@ -478,8 +517,8 @@ class TelecomScraper:
                         'internet': '20 GB',
                         'minutes': '1500 dk',
                         'sms': '1000 SMS',
-                        'source': url,
-                        'note': '⚠️ Örnek veri - Lütfen turktelekom.com.tr sitesini kontrol edin'
+                        'source': 'https://www.turktelekom.com.tr/mobil/kampanyalar/efsane',
+                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
                     },
                     {
                         'operator': 'Türk Telekom',
@@ -488,8 +527,8 @@ class TelecomScraper:
                         'internet': '30 GB',
                         'minutes': '2000 dk',
                         'sms': '1500 SMS',
-                        'source': url,
-                        'note': '⚠️ Örnek veri - Lütfen turktelekom.com.tr sitesini kontrol edin'
+                        'source': 'https://www.turktelekom.com.tr/mobil/kampanyalar/super',
+                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
                     }
                 ]
             

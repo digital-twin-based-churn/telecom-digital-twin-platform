@@ -285,14 +285,19 @@ class RAGChatbot:
                             
                             4. Tablo ÜSTÜne şu notu ekle: "🔴 CANLI VERİLER: Aşağıdaki bilgiler operatörlerin resmi sitelerinden anlık olarak çekilmiştir."
                             
-                            5. Tablonun ALTINA MUTLAKA kaynak linklerini ekle:
+                            5. Tablonun ALTINA MUTLAKA her kampanyanın kendi linkini ekle:
                                
-                               **📌 Kaynak Linkler (Scraping Yapılan Siteler):**
-                               - Turkcell: [yukarıdaki Turkcell kaynak URL'ini buraya yaz]
-                               - Vodafone: [yukarıdaki Vodafone kaynak URL'ini buraya yaz]
-                               - Türk Telekom: [yukarıdaki Türk Telekom kaynak URL'ini buraya yaz]
+                               **📌 Kampanya Detay Linkleri:**
                                
-                               ⚠️ Fiyatlar ve kampanya detayları değişebilir. Kesin bilgi için yukarıdaki linkleri ziyaret edin.
+                               Her kampanya için yukarıdaki CANLI VERİLER bölümünde belirtilen "Kaynak" URL'lerini kullan.
+                               Format: 
+                               - [Operatör] - [Kampanya Adı]: [Kaynak URL]
+                               
+                               Örnek:
+                               - Turkcell Yeni Müşteri Paketi: https://www.turkcell.com.tr/kampanya/...
+                               - Vodafone Red Paket: https://www.vodafone.com.tr/kampanya/...
+                               
+                               ⚠️ Fiyatlar değişebilir. Her kampanyanın detayı için yukarıdaki kendi linkine tıklayın.
                             """
                         else:
                             telecom_prompt = f"""
