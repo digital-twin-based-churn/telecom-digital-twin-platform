@@ -156,28 +156,49 @@ const Chatbot = () => {
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'tr-TR' // Türkçe
-    recognition.continuous = false
-    recognition.interimResults = false
+    recognition.continuous = true // Sürekli dinle
+    recognition.interimResults = true // Ara sonuçları göster
 
     recognition.onstart = () => {
       setIsListening(true)
     }
 
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript
-      setMessage(prev => prev + (prev ? ' ' : '') + transcript)
+      let finalTranscript = ''
+      let interimTranscript = ''
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript
+        } else {
+          interimTranscript += transcript
+        }
+      }
+
+      if (finalTranscript) {
+        setMessage(prev => prev + (prev ? ' ' : '') + finalTranscript)
+      }
     }
 
     recognition.onerror = (event: any) => {
       console.error('Ses tanıma hatası:', event.error)
-      setIsListening(false)
       if (event.error === 'not-allowed') {
         alert('Mikrofon erişimi reddedildi. Lütfen tarayıcı ayarlarından mikrofon iznini verin.')
+        setIsListening(false)
       }
+      // Diğer hatalarda dinlemeye devam et
     }
 
     recognition.onend = () => {
-      setIsListening(false)
+      // Eğer hala dinleme modundaysak, yeniden başlat
+      if (isListening) {
+        try {
+          recognition.start()
+        } catch (e) {
+          setIsListening(false)
+        }
+      }
     }
 
     recognitionRef.current = recognition
@@ -279,17 +300,17 @@ const Chatbot = () => {
         {/* Header */}
         <div className="p-6 border-b border-blue-200/60 dark:border-gray-700/60">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
               <Bot className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 bg-clip-text text-transparent">CHAT A.I+</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Dijital İkiz Asistanı</p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Akıllı Asistan</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Telekomünikasyon Uzmanı</p>
             </div>
           </div>
           
           <Button 
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
             onClick={handleNewChat}
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -444,7 +465,7 @@ const Chatbot = () => {
           </div>
           
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-sm">
               <span className="text-white text-sm font-medium">
                 {user?.username?.charAt(0) || user?.email?.charAt(0) || 'U'}
               </span>
@@ -468,11 +489,11 @@ const Chatbot = () => {
         <div className="bg-white/98 dark:bg-gray-800/98 backdrop-blur-md border-b border-blue-200/60 dark:border-gray-700/60 p-6 shadow-sm flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
                 <Bot className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 bg-clip-text text-transparent">CHAT A.I+</h2>
+                <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">CHAT A.I+</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Dijital İkiz Tabanlı Churn Önleme Asistanı</p>
               </div>
             </div>
@@ -496,20 +517,20 @@ const Chatbot = () => {
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                   <div className={`max-w-[80%] flex items-start space-x-4 ${msg.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm ${
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md ${
                       msg.type === 'user' 
-                        ? 'bg-gradient-to-br from-blue-600 to-indigo-600' 
-                        : 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600'
+                        ? 'bg-gradient-to-br from-blue-500 to-indigo-500' 
+                        : 'bg-gradient-to-br from-cyan-500 to-blue-500'
                     }`}>
                       {msg.type === 'user' ? (
                         <User className="w-5 h-5 text-white" />
                       ) : (
-                        <Bot className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        <Bot className="w-5 h-5 text-white" />
                       )}
                     </div>
-                    <div className={`rounded-2xl p-5 shadow-sm ${
+                    <div className={`rounded-2xl p-5 shadow-md ${
                       msg.type === 'user' 
-                        ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white' 
+                        ? 'bg-gradient-to-br from-blue-500 to-indigo-500 text-white' 
                         : 'bg-white dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700/60'
                     }`}>
                       <div className="text-sm leading-relaxed font-medium prose prose-sm max-w-none dark:prose-invert">
@@ -658,8 +679,8 @@ const Chatbot = () => {
                   onClick={toggleVoiceRecognition}
                   className={`absolute right-14 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 rounded-xl shadow-lg transition-all ${
                     isListening 
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white animate-pulse' 
-                      : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white'
+                      ? 'bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white animate-pulse ring-2 ring-blue-300/50' 
+                      : 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white'
                   }`}
                   title={isListening ? "Dinleniyor..." : "Sesle yazın"}
                 >
@@ -668,7 +689,7 @@ const Chatbot = () => {
                 <Button 
                   type="submit" 
                   size="sm" 
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white h-10 w-10 p-0 rounded-xl shadow-lg"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white h-10 w-10 p-0 rounded-xl shadow-lg"
                   disabled={!message.trim()}
                 >
                   <Send className="w-5 h-5" />
