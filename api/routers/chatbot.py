@@ -7,7 +7,7 @@ from services.rag_chatbot import rag_chatbot
 from auth import get_current_user
 from schemas import UserResponse as User
 
-router = APIRouter(prefix="/chatbot", tags=["chatbot"])
+router = APIRouter(prefix="/api/chatbot", tags=["chatbot"])
 logger = logging.getLogger(__name__)
 
 class ChatMessage(BaseModel):
@@ -120,9 +120,11 @@ async def chatbot_health():
         
         return {
             "status": "healthy",
+            "model": "google-gemini-2.0-flash",
             "llm_connected": rag_chatbot.llm is not None,
             "vectorstore_connected": rag_chatbot.vectorstore is not None,
-            "search_tool_connected": rag_chatbot.search_tool is not None,
+            "web_search_connected": rag_chatbot.tavily_client is not None,
+            "tavily_enabled": rag_chatbot.tavily_client is not None,
             "test_response_length": len(test_response)
         }
         

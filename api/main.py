@@ -76,7 +76,7 @@ app.add_middleware(
         
         "*"
     ],
-    allow_credentials=True,
+    allow_credentials=False,  # Must be False when using "*" in allow_origins
     allow_methods=[
         "GET", "POST", "PUT", "DELETE", "OPTIONS", 
         "HEAD", "PATCH", "TRACE", "CONNECT"
@@ -138,25 +138,13 @@ app.add_middleware(
     max_age=3600,
 )
 
-@app.middleware("http")
-async def add_cors_headers(request: Request, call_next):
-    response = await call_next(request)
-    
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH"
-    response.headers["Access-Control-Allow-Headers"] = "Accept, Accept-Language, Content-Language, Content-Type, Authorization, X-Requested-With, X-CSRFToken, Origin, Referer, User-Agent"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Max-Age"] = "3600"
-    
-    return response
+# CORS is handled by CORSMiddleware above - no need for additional middleware
 
 @app.get("/")
 async def root():
     return {"message": "Dijital İkiz Tabanlı Churn Önleme  Proje API'sine hoş geldiniz!"}
 
-@app.options("/{path:path}")
-async def options_handler(path: str):
-    return {"message": "OK"}
+# OPTIONS requests are automatically handled by CORSMiddleware
 
 @app.get("/health")
 async def health_check():

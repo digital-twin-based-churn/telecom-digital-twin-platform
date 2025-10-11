@@ -86,7 +86,7 @@ class ApiService {
     formData.append('email', credentials.email);
     formData.append('password', credentials.password);
 
-    const response = await fetch(`${this.baseURL}/auth/login`, {
+    const response = await fetch(`${this.baseURL}/api/auth/login`, {
       method: 'POST',
       body: formData,
     });
@@ -103,7 +103,7 @@ class ApiService {
   }
 
   async loginWithJson(credentials: LoginRequest): Promise<AuthResponse> {
-    const data = await this.request<AuthResponse>('/auth/login', {
+    const data = await this.request<AuthResponse>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -114,14 +114,14 @@ class ApiService {
   }
 
   async register(userData: RegisterRequest): Promise<User> {
-    return this.request<User>('/auth/register', {
+    return this.request<User>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
   }
 
   async getCurrentUser(): Promise<User> {
-    return this.request<User>('/auth/me');
+    return this.request<User>('/api/auth/me');
   }
 
   async logout(): Promise<void> {
@@ -129,14 +129,14 @@ class ApiService {
     localStorage.removeItem('access_token');
     // Optionally call logout endpoint
     try {
-      await this.request('/auth/logout', { method: 'POST' });
+      await this.request('/api/auth/logout', { method: 'POST' });
     } catch (error) {
       // Ignore logout endpoint errors
     }
   }
 
   async verifyToken(): Promise<{ valid: boolean; user: string }> {
-    return this.request<{ valid: boolean; user: string }>('/auth/verify-token');
+    return this.request<{ valid: boolean; user: string }>('/api/auth/verify-token');
   }
 
   // User methods
@@ -180,7 +180,7 @@ class ApiService {
 
   // Chatbot API methods
   async chatWithBot(message: string, conversationId?: string): Promise<any> {
-    return await this.request('/chatbot/chat', {
+    return await this.request('/api/chatbot/chat', {
       method: 'POST',
       body: JSON.stringify({
         message,
@@ -190,7 +190,7 @@ class ApiService {
   }
 
   async getCompetitorAnalysis(updateData: boolean = false): Promise<any> {
-    return await this.request('/chatbot/competitor-analysis', {
+    return await this.request('/api/chatbot/competitor-analysis', {
       method: 'POST',
       body: JSON.stringify({
         update_data: updateData
@@ -199,13 +199,13 @@ class ApiService {
   }
 
   async updateKnowledgeBase(): Promise<any> {
-    return await this.request('/chatbot/update-knowledge', {
+    return await this.request('/api/chatbot/update-knowledge', {
       method: 'POST',
     });
   }
 
   async getChatbotHealth(): Promise<any> {
-    return await this.request('/chatbot/health', {
+    return await this.request('/api/chatbot/health', {
       method: 'GET',
     });
   }

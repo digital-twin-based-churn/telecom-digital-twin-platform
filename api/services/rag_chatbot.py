@@ -7,6 +7,9 @@ import logging
 import google.generativeai as genai
 from langchain.prompts import PromptTemplate
 from langchain.schema import Document
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+
 try:
     from tavily import TavilyClient
 except ImportError:
@@ -33,6 +36,8 @@ class RAGChatbot:
         
         # Initialize components
         self._initialize_llm()
+        self._initialize_embeddings()
+        self._initialize_vectorstore()
         self._initialize_web_search()
         self._initialize_qa_chain()
         
@@ -44,22 +49,66 @@ class RAGChatbot:
             # Get Google API key from config
             google_api_key = settings.GOOGLE_API_KEY
             
-            if not google_api_key or google_api_key.strip() == "" or "DummyKey" in google_api_key:
+            if not google_api_key or google_api_key.strip() == "":
                 logger.warning("No valid Google API key found. Chatbot will work in offline mode.")
+                logger.info("Please add your Google Gemini API key to .env file: GOOGLE_API_KEY=AIzaSy...")
+                logger.info("Get your free key at: https://makersuite.google.com/app/apikey")
                 self.llm = None
                 return
             
-            # Configure Gemini API
-            logger.info("Initializing Google Gemini LLM")
+            # Configure Google Gemini API
+            logger.info("Initializing Google Gemini")
             genai.configure(api_key=google_api_key)
             
-            # Initialize Gemini model
-            self.llm = genai.GenerativeModel('gemini-2.5-flash')
-            logger.info("Google Gemini LLM initialized successfully")
+            # Initialize Gemini model (using latest flash model)
+            self.llm = genai.GenerativeModel('gemini-2.0-flash-exp')
+            logger.info("Google Gemini initialized successfully")
                 
         except Exception as e:
-            logger.error(f"Failed to initialize Gemini LLM: {e}")
+            logger.error(f"Failed to initialize Google Gemini: {e}")
             self.llm = None
+
+    def _initialize_embeddings(self):
+        """Initialize embedding model for vectorstore"""
+        try:
+            logger.info("Initializing embeddings model (this may take a minute on first run)...")
+            # Use a small, fast model for Turkish language support
+            self.embeddings = HuggingFaceEmbeddings(
+                model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+                model_kwargs={'device': 'cpu'},
+                encode_kwargs={'normalize_embeddings': True}
+            )
+            logger.info("Embeddings model initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize embeddings: {e}")
+            self.embeddings = None
+
+    def _initialize_vectorstore(self):
+        """Initialize ChromaDB vectorstore"""
+        try:
+            if not self.embeddings:
+                logger.warning("Embeddings not available, skipping vectorstore initialization")
+                self.vectorstore = None
+                return
+            
+            logger.info("Initializing ChromaDB vectorstore...")
+            # Create or load ChromaDB
+            self.vectorstore = Chroma(
+                collection_name="telecom_knowledge_base",
+                embedding_function=self.embeddings,
+                persist_directory="./chroma_db"
+            )
+            
+            # Create retriever
+            self.retriever = self.vectorstore.as_retriever(
+                search_kwargs={"k": 3}  # Return top 3 most relevant documents
+            )
+            
+            logger.info(f"ChromaDB vectorstore initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize vectorstore: {e}")
+            self.vectorstore = None
+            self.retriever = None
 
     def _initialize_web_search(self):
         """Initialize web search client"""
@@ -75,6 +124,7 @@ class RAGChatbot:
             logger.info("Initializing Tavily web search client")
             if TavilyClient:
                 self.tavily_client = TavilyClient(api_key=tavily_api_key)
+                self.search_tool = self.tavily_client  # Also set search_tool
             else:
                 self.tavily_client = None
             logger.info("Tavily web search client initialized successfully")
@@ -130,28 +180,47 @@ class RAGChatbot:
                         for i, result in enumerate(web_results, 1):
                             web_context += f"{i}. {result['title']}\n   {result['content'][:200]}...\n   Kaynak: {result['url']}\n\n"
                     
-                    telecom_prompt = f"""
-                    Sen Türk telekomünikasyon sektörü konusunda uzman bir AI asistanısın. 
-                    Kullanıcının sorularını Türkçe olarak yanıtla ve telekomünikasyon sektörü hakkında 
-                    detaylı, güncel ve faydalı bilgiler ver.
+                    # Basit selamlaşma kontrolü
+                    is_greeting = any(word in message.lower() for word in ["merhaba", "selam", "hello", "hi", "hey"])
                     
-                    Kullanıcı sorusu: {message}
-                    {web_context}
+                    if is_greeting:
+                        # Selamlaşma için kısa yanıt
+                        telecom_prompt = f"""
+                        Kullanıcı sana selam verdi: {message}
+                        
+                        Kısa ve samimi bir şekilde karşılık ver (maksimum 2-3 cümle).
+                        Kendini tanıt: Türk telekomünikasyon sektörü konusunda yardımcı bir AI asistanısın.
+                        Nasıl yardımcı olabileceğini kısaca sor.
+                        """
+                    else:
+                        # Normal soru için detaylı yanıt
+                        telecom_prompt = f"""
+                        Sen Türk telekomünikasyon sektörü konusunda uzman bir AI asistanısın.
+                        
+                        Kullanıcı sorusu: {message}
+                        {web_context}
+                        
+                        KURALLAR:
+                        1. Kısa ve öz yanıt ver (maksimum 300 kelime)
+                        2. SADECE kullanıcı açıkça paket/tarife/kampanya karşılaştırması isterse tablo kullan
+                        3. Basit sorulara basit yanıt ver
+                        4. Eğer tablo kullanıyorsan şu formatta:
+                        
+                        | Paket Adı | Fiyat | İnternet | Dakika | SMS |
+                        |-----------|-------|----------|--------|-----|
+                        | Paket 1   | 50 TL | 10 GB    | 1000   | 100 |
+                        
+                        5. Gereksiz detaya girme, sadece sorulan şeyi yanıtla
+                        """
                     
-                    ÖNEMLİ: Eğer kullanıcı paket, tarife, kampanya veya fiyat bilgisi istiyorsa, 
-                    yanıtını MUTLAKA tablo formatında sun. Markdown tablo kullan:
-                    
-                    | Paket Adı | Fiyat | İnternet | Dakika | SMS | Özellikler |
-                    |-----------|-------|----------|--------|-----|------------|
-                    | Paket 1   | 50 TL | 10 GB    | 1000   | 100 | Özellik 1  |
-                    
-                    Yanıtını Türkçe olarak ver ve telekomünikasyon sektörü odaklı ol.
-                    Eğer web arama sonuçları varsa, bunları da dikkate al.
-                    Tablo formatında bilgi sunmayı unutma!
-                    """
-                    
-                    # Use Gemini to generate response
-                    response = self.llm.generate_content(telecom_prompt)
+                    # Use Google Gemini to generate response with token limit
+                    response = self.llm.generate_content(
+                        telecom_prompt,
+                        generation_config=genai.types.GenerationConfig(
+                            max_output_tokens=500 if is_greeting else 1000,  # Selamlaşma kısa, diğerleri orta
+                            temperature=0.7,
+                        )
+                    )
                     return response.text if response.text else "Üzgünüm, yanıt oluşturulamadı."
                     
                 except Exception as e:
@@ -179,49 +248,66 @@ class RAGChatbot:
         return any(keyword in message_lower for keyword in current_info_keywords)
 
     def _get_offline_response(self, message: str) -> str:
-        """Provide offline responses when API key is not available"""
+        """Provide offline responses when Google Gemini API key is not available"""
         message_lower = message.lower()
         
         # Greeting responses
         if any(word in message_lower for word in ["merhaba", "selam", "hello", "hi"]):
-            return "Merhaba! Ben Türk telekomünikasyon sektörü hakkında bilgi verebilen bir asistanım. Şu anda offline modda çalışıyorum. API anahtarı yapılandırıldığında daha detaylı yanıtlar verebilirim."
+            return "Merhaba! Ben Türk telekomünikasyon sektörü hakkında bilgi verebilen bir asistanım. Şu anda offline modda çalışıyorum. Google Gemini API anahtarı ekleyerek (.env dosyasına GOOGLE_API_KEY) akıllı yanıtlar alabilirsiniz. Key almak için: https://makersuite.google.com/app/apikey"
         
         # Company specific responses
         elif any(word in message_lower for word in ["turkcell", "vodafone", "türk telekom"]):
-            return "Türk telekomünikasyon sektöründe Turkcell, Vodafone ve Türk Telekom ana oyuncular. Her birinin farklı güçlü yanları ve hizmetleri var. Daha detaylı bilgi için API anahtarının yapılandırılması gerekiyor."
+            return "Türk telekomünikasyon sektöründe Turkcell, Vodafone ve Türk Telekom ana oyuncular. Daha detaylı bilgi için Google Gemini API anahtarı gerekiyor."
         
         # Technology responses
         elif any(word in message_lower for word in ["5g", "fiber", "internet", "mobil"]):
-            return "5G, fiber internet ve mobil teknolojiler hakkında sorularınızı yanıtlayabilirim. Şu anda offline modda olduğum için genel bilgiler verebiliyorum."
+            return "5G, fiber internet ve mobil teknolojiler hakkında detaylı bilgi verebilirim. Google Gemini modelinin aktif olması gerekiyor."
         
         # Campaign/pricing responses
         elif any(word in message_lower for word in ["kampanya", "fiyat", "tarife", "promosyon", "indirim"]):
-            return "Kampanya ve fiyat bilgileri için güncel verilere ihtiyaç var. Şu anda offline modda olduğum için bu bilgileri sağlayamıyorum. API anahtarı yapılandırıldığında güncel kampanya bilgileri verebilirim."
+            return "Kampanya ve fiyat bilgileri için Google Gemini modelinin aktif olması gerekiyor. .env dosyasına GOOGLE_API_KEY ekleyin."
         
         # Current news responses
         elif any(word in message_lower for word in ["güncel", "son", "yeni", "bugün", "haber"]):
-            return "Güncel haberler ve son gelişmeler için web arama gerekli. Şu anda offline modda olduğum için güncel bilgileri sağlayamıyorum."
+            return "Güncel haberler için hem Google Gemini hem de Tavily Web Search API anahtarlarının yapılandırılması gerekiyor."
         
         # Default response
         else:
-            return "Sorunuzu anlıyorum. Türk telekomünikasyon sektörü hakkında yardımcı olmaya çalışıyorum. Daha detaylı yanıtlar için API anahtarının yapılandırılması gerekiyor."
+            return "⚠️ OFFLINE MOD: Chatbot şu anda offline modda. Akıllı yanıtlar için .env dosyasına Google Gemini API key ekleyin: GOOGLE_API_KEY=AIzaSy... | Key almak için: https://makersuite.google.com/app/apikey"
 
     async def get_response(self, message: str) -> str:
         """Alias for chat method to maintain compatibility with router"""
         return await self.chat(message)
 
     def add_documents(self, documents: List[Document]):
-        """Add documents to the knowledge base (simplified)"""
-        logger.info(f"Adding {len(documents)} documents to knowledge base")
-        # For now, just log the documents
-        for doc in documents:
-            logger.info(f"Document: {doc.page_content[:100]}...")
+        """Add documents to the ChromaDB knowledge base"""
+        try:
+            if not self.vectorstore:
+                logger.warning("Vectorstore not available. Cannot add documents.")
+                return
+            
+            logger.info(f"Adding {len(documents)} documents to ChromaDB knowledge base")
+            # Add documents to ChromaDB
+            self.vectorstore.add_documents(documents)
+            logger.info(f"Successfully added {len(documents)} documents to knowledge base")
+        except Exception as e:
+            logger.error(f"Error adding documents: {e}")
 
     def search_documents(self, query: str, k: int = 5) -> List[Document]:
-        """Search documents (simplified)"""
-        logger.info(f"Searching for: {query}")
-        # For now, return empty list
-        return []
+        """Search documents in ChromaDB vectorstore"""
+        try:
+            if not self.vectorstore:
+                logger.warning("Vectorstore not available. Cannot search documents.")
+                return []
+            
+            logger.info(f"Searching vectorstore for: {query}")
+            # Search in ChromaDB
+            results = self.vectorstore.similarity_search(query, k=k)
+            logger.info(f"Found {len(results)} relevant documents")
+            return results
+        except Exception as e:
+            logger.error(f"Error searching documents: {e}")
+            return []
 
     def search_web(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
         """Search the web using Tavily API"""
@@ -260,12 +346,22 @@ class RAGChatbot:
 
     def get_knowledge_base_info(self) -> Dict[str, Any]:
         """Get information about the knowledge base"""
+        doc_count = 0
+        if self.vectorstore:
+            try:
+                doc_count = self.vectorstore._collection.count()
+            except:
+                doc_count = 0
+        
         return {
-            "status": "simplified_mode",
+            "status": "google_gemini_with_vectorstore",
+            "model": "gemini-2.0-flash-exp",
+            "embedding_model": "paraphrase-multilingual-MiniLM-L12-v2",
             "llm_available": self.llm is not None,
-            "vectorstore_available": False,
-            "search_available": False,
-            "message": "Basitleştirilmiş mod - sadece temel AI yanıtları"
+            "vectorstore_available": self.vectorstore is not None,
+            "web_search_available": self.tavily_client is not None,
+            "document_count": doc_count,
+            "message": "Google Gemini + ChromaDB VectorStore + Tavily aktif" if self.llm and self.vectorstore else "Offline mod"
         }
 
     async def get_competitor_analysis(self) -> str:
@@ -297,10 +393,16 @@ class RAGChatbot:
             """
             
             if self.llm:
-                response = self.llm.generate_content(analysis_prompt)
+                response = self.llm.generate_content(
+                    analysis_prompt,
+                    generation_config=genai.types.GenerationConfig(
+                        max_output_tokens=2000,  # Analiz için daha fazla token
+                        temperature=0.7,
+                    )
+                )
                 return response.text if response.text else "Analiz oluşturulamadı."
             else:
-                return "AI modeli mevcut değil. Lütfen daha sonra tekrar deneyin."
+                return "Google Gemini modeli mevcut değil. Lütfen .env dosyasında GOOGLE_API_KEY ayarlayın."
                 
         except Exception as e:
             logger.error(f"Error in competitor analysis: {e}")

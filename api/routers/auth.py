@@ -9,7 +9,7 @@ from crud import create_user
 from auth import authenticate_user, create_access_token, get_current_active_user, ACCESS_TOKEN_EXPIRE_MINUTES, get_user_by_email
 
 router = APIRouter(
-    prefix="/auth",
+    prefix="/api/auth",
     tags=["Authentication"]
 )
 
