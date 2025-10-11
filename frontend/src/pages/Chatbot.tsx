@@ -40,7 +40,9 @@ import {
   Cpu,
   Database,
   Network,
-  LogOut
+  LogOut,
+  Mic,
+  MicOff
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
@@ -50,7 +52,9 @@ const Chatbot = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [message, setMessage] = useState("")
+  const [isListening, setIsListening] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const recognitionRef = useRef<any>(null)
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -120,6 +124,75 @@ const Chatbot = () => {
     setConversations(prev => prev.map(conv => ({ ...conv, active: false })))
   }
 
+  const handleDeleteConversation = (convId: number, e: React.MouseEvent) => {
+    e.stopPropagation() // Sohbete tıklanmasını engelle
+    // Sohbeti listeden kaldır
+    setConversations(prev => prev.filter(conv => conv.id !== convId))
+    setRecentConversations(prev => prev.filter(conv => conv.id !== convId))
+  }
+
+  // Ses tanıma başlat/durdur
+  const toggleVoiceRecognition = () => {
+    if (isListening) {
+      // Dinlemeyi durdur
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+      setIsListening(false)
+    } else {
+      // Dinlemeyi başlat
+      startVoiceRecognition()
+    }
+  }
+
+  const startVoiceRecognition = () => {
+    // Web Speech API desteğini kontrol et
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    
+    if (!SpeechRecognition) {
+      alert('Tarayıcınız ses tanıma özelliğini desteklemiyor. Lütfen Chrome veya Safari kullanın.')
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'tr-TR' // Türkçe
+    recognition.continuous = false
+    recognition.interimResults = false
+
+    recognition.onstart = () => {
+      setIsListening(true)
+    }
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript
+      setMessage(prev => prev + (prev ? ' ' : '') + transcript)
+    }
+
+    recognition.onerror = (event: any) => {
+      console.error('Ses tanıma hatası:', event.error)
+      setIsListening(false)
+      if (event.error === 'not-allowed') {
+        alert('Mikrofon erişimi reddedildi. Lütfen tarayıcı ayarlarından mikrofon iznini verin.')
+      }
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognitionRef.current = recognition
+    recognition.start()
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+    }
+  }, [])
+
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -148,6 +221,25 @@ const Chatbot = () => {
     setMessages([...messages, newMessage])
     const currentMessage = message
     setMessage("")
+
+    // Eğer aktif sohbet yoksa, yeni sohbet geçmişi oluştur
+    const hasActiveConversation = conversations.some(conv => conv.active)
+    if (!hasActiveConversation && messages.length <= 1) {
+      // İlk mesajdan başlık oluştur (ilk 50 karakter)
+      const title = currentMessage.length > 50 
+        ? currentMessage.substring(0, 50) + '...' 
+        : currentMessage
+      
+      const newConversation = {
+        id: Date.now(), // Unique ID
+        title: title,
+        active: true,
+        time: 'Şimdi'
+      }
+      
+      // Yeni sohbeti conversations listesinin başına ekle
+      setConversations(prev => [newConversation, ...prev.map(c => ({ ...c, active: false }))])
+    }
 
     try {
       // Call RAG chatbot API
@@ -267,7 +359,7 @@ const Chatbot = () => {
               {conversations.map((conv) => (
                 <div
                   key={conv.id}
-                  className={`p-4 rounded-xl cursor-pointer transition-all duration-300 ${
+                  className={`group p-4 rounded-xl cursor-pointer transition-all duration-300 ${
                     conv.active 
                       ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' 
                       : 'hover:bg-gray-50/80 dark:hover:bg-gray-700/80 hover:shadow-sm'
@@ -290,9 +382,18 @@ const Chatbot = () => {
                         {conv.time}
                       </p>
                     </div>
-                    {conv.active && (
-                      <ChevronRight className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                    )}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => handleDeleteConversation(conv.id, e)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all"
+                        title="Sohbeti sil"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400" />
+                      </button>
+                      {conv.active && (
+                        <ChevronRight className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -308,14 +409,25 @@ const Chatbot = () => {
               {recentConversations.map((conv) => (
                 <div
                   key={conv.id}
-                  className="p-3 rounded-lg cursor-pointer hover:bg-gray-50/80 dark:hover:bg-gray-700/80 transition-all duration-200 hover:shadow-sm"
+                  className="group p-3 rounded-lg cursor-pointer hover:bg-gray-50/80 dark:hover:bg-gray-700/80 transition-all duration-200 hover:shadow-sm"
                 >
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {conv.title}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {conv.time}
-                  </p>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {conv.title}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {conv.time}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => handleDeleteConversation(conv.id, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all"
+                      title="Sohbeti sil"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -537,9 +649,22 @@ const Chatbot = () => {
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Mesajınızı yazın..."
-                  className="pr-14 h-14 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20 bg-gray-50/80 dark:bg-gray-700/80 rounded-2xl text-base font-medium"
+                  placeholder="Mesajınızı yazın veya sesle söyleyin..."
+                  className="pr-24 h-14 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20 bg-gray-50/80 dark:bg-gray-700/80 rounded-2xl text-base font-medium"
                 />
+                <Button 
+                  type="button"
+                  size="sm" 
+                  onClick={toggleVoiceRecognition}
+                  className={`absolute right-14 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 rounded-xl shadow-lg transition-all ${
+                    isListening 
+                      ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white animate-pulse' 
+                      : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white'
+                  }`}
+                  title={isListening ? "Dinleniyor..." : "Sesle yazın"}
+                >
+                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </Button>
                 <Button 
                   type="submit" 
                   size="sm" 
