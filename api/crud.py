@@ -6,9 +6,21 @@ from auth import get_password_hash
 
 def create_user(db: Session, user: UserCreate) -> User:
     hashed_password = get_password_hash(user.password)
+    
+    # If username not provided, generate from email
+    username = user.username
+    if not username:
+        username = user.email.split('@')[0]
+        # Ensure username is unique by adding numbers if needed
+        base_username = username
+        counter = 1
+        while get_user_by_username(db, username):
+            username = f"{base_username}{counter}"
+            counter += 1
+    
     db_user = User(
         email=user.email,
-        username=user.username,
+        username=username,
         full_name=user.full_name,
         hashed_password=hashed_password,
         is_active=True
