@@ -188,8 +188,20 @@ class RAGChatbot:
                 try:
                     scraped_campaigns = await asyncio.to_thread(get_live_campaigns)
                     logger.info(f"✅ BAŞARILI! {len(scraped_campaigns)} kampanya çekildi!")
-                    for camp in scraped_campaigns[:3]:
-                        logger.info(f"   📌 {camp['operator']}: {camp['name']} - {camp['price']}")
+                    logger.info("")
+                    logger.info("📋 ÇEKILEN KAMPANYALAR:")
+                    logger.info("-" * 80)
+                    for camp in scraped_campaigns:
+                        logger.info(f"   🏢 {camp['operator']}")
+                        logger.info(f"   📦 Kampanya: {camp['name']}")
+                        logger.info(f"   💰 Fiyat: {camp['price']}")
+                        logger.info(f"   📶 İnternet: {camp['internet']}")
+                        logger.info(f"   📞 Dakika: {camp['minutes']}")
+                        logger.info(f"   💬 SMS: {camp['sms']}")
+                        logger.info(f"   🔗 Kaynak: {camp['source']}")
+                        if 'note' in camp:
+                            logger.info(f"   ⚠️  Not: {camp['note']}")
+                        logger.info("-" * 80)
                 except Exception as e:
                     logger.error(f"❌ Scraping hatası: {e}")
                     import traceback
@@ -272,7 +284,15 @@ class RAGChatbot:
                             | Türk Telekom | ... | ... | ... | ... | ... | ... |
                             
                             4. Tablo ÜSTÜne şu notu ekle: "🔴 CANLI VERİLER: Aşağıdaki bilgiler operatörlerin resmi sitelerinden anlık olarak çekilmiştir."
-                            5. Tablonun ALTINA şu notu ekle: "⚠️ Fiyatlar ve kampanya detayları değişebilir. Kesin bilgi için operatörlerin resmi sitelerini ziyaret edin."
+                            
+                            5. Tablonun ALTINA MUTLAKA kaynak linklerini ekle:
+                               
+                               **📌 Kaynak Linkler (Scraping Yapılan Siteler):**
+                               - Turkcell: [yukarıdaki Turkcell kaynak URL'ini buraya yaz]
+                               - Vodafone: [yukarıdaki Vodafone kaynak URL'ini buraya yaz]
+                               - Türk Telekom: [yukarıdaki Türk Telekom kaynak URL'ini buraya yaz]
+                               
+                               ⚠️ Fiyatlar ve kampanya detayları değişebilir. Kesin bilgi için yukarıdaki linkleri ziyaret edin.
                             """
                         else:
                             telecom_prompt = f"""
