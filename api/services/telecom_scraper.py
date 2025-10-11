@@ -242,23 +242,23 @@ class TelecomScraper:
                 campaigns = [
                     {
                         'operator': 'Turkcell',
-                        'name': 'Yeni Müşteri Paketi',
+                        'name': 'Yeni Müşteri Kampanyaları',
                         'price': '249 TL',
                         'internet': '25 GB',
                         'minutes': '1500 dk',
                         'sms': '250 SMS',
-                        'source': 'https://www.turkcell.com.tr/kampanyalar/yeni-musteriye-ozel',
-                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
+                        'source': 'https://www.turkcell.com.tr/kampanyalar',
+                        'note': '⚠️ Örnek veri - Gerçek kampanyalar için siteyi ziyaret edin'
                     },
                     {
                         'operator': 'Turkcell',
-                        'name': 'Fırsat Paketi',
+                        'name': 'Hoş Geldin Paketleri',
                         'price': '299 TL',
                         'internet': '35 GB',
                         'minutes': '2000 dk',
                         'sms': '500 SMS',
-                        'source': 'https://www.turkcell.com.tr/kampanyalar/firsatlar',
-                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
+                        'source': 'https://www.turkcell.com.tr/bireysel/tarifeler',
+                        'note': '⚠️ Örnek veri - Gerçek kampanyalar için siteyi ziyaret edin'
                     }
                 ]
             
@@ -266,13 +266,13 @@ class TelecomScraper:
             logger.error(f"Error scraping Turkcell: {e}")
             campaigns = [{
                 'operator': 'Turkcell',
-                'name': 'Scraping Hatası',
+                'name': 'Scraping Hatası - Siteyi Ziyaret Edin',
                 'price': '249 TL',
                 'internet': '25 GB',
                 'minutes': '1500 dk',
                 'sms': '250 SMS',
-                'source': url,
-                'note': f'⚠️ Hata: {str(e)[:50]} - Örnek veri gösteriliyor'
+                'source': 'https://www.turkcell.com.tr/kampanyalar',
+                'note': '⚠️ Scraping hatası - Gerçek kampanyalar için linke tıklayın'
             }]
         
         finally:
@@ -377,23 +377,23 @@ class TelecomScraper:
                 campaigns = [
                     {
                         'operator': 'Vodafone',
-                        'name': 'Red Paket',
+                        'name': 'Red Kampanyaları',
                         'price': '279 TL',
                         'internet': '30 GB',
                         'minutes': '2000 dk',
                         'sms': '500 SMS',
-                        'source': 'https://www.vodafone.com.tr/kampanyalar/red',
-                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
+                        'source': 'https://www.vodafone.com.tr/kampanyalar',
+                        'note': '⚠️ Örnek veri - Gerçek kampanyalar için siteyi ziyaret edin'
                     },
                     {
                         'operator': 'Vodafone',
-                        'name': 'Süper Paket',
+                        'name': 'Yeni Müşteri Fırsatları',
                         'price': '329 TL',
                         'internet': '40 GB',
                         'minutes': 'Sınırsız',
                         'sms': 'Sınırsız',
-                        'source': 'https://www.vodafone.com.tr/kampanyalar/super-paket',
-                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
+                        'source': 'https://www.vodafone.com.tr/kampanyalar/yeni-musteri-farki',
+                        'note': '⚠️ Örnek veri - Gerçek kampanyalar için siteyi ziyaret edin'
                     }
                 ]
             
@@ -401,13 +401,13 @@ class TelecomScraper:
             logger.error(f"Error scraping Vodafone: {e}")
             campaigns = [{
                 'operator': 'Vodafone',
-                'name': 'Scraping Hatası',
+                'name': 'Scraping Hatası - Siteyi Ziyaret Edin',
                 'price': '279 TL',
                 'internet': '30 GB',
                 'minutes': '2000 dk',
                 'sms': '500 SMS',
-                'source': url if 'url' in locals() else 'https://www.vodafone.com.tr',
-                'note': f'⚠️ Hata: {str(e)[:50]} - Örnek veri gösteriliyor'
+                'source': 'https://www.vodafone.com.tr/kampanyalar',
+                'note': '⚠️ Scraping hatası - Gerçek kampanyalar için linke tıklayın'
             }]
         
         finally:
@@ -512,23 +512,23 @@ class TelecomScraper:
                 campaigns = [
                     {
                         'operator': 'Türk Telekom',
-                        'name': 'Efsane Paket',
+                        'name': 'Yeni Hat Kampanyaları',
                         'price': '239 TL',
                         'internet': '20 GB',
                         'minutes': '1500 dk',
                         'sms': '1000 SMS',
-                        'source': 'https://www.turktelekom.com.tr/mobil/kampanyalar/efsane',
-                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
+                        'source': 'https://www.turktelekom.com.tr/mobil/kampanyalar',
+                        'note': '⚠️ Örnek veri - Gerçek kampanyalar için siteyi ziyaret edin'
                     },
                     {
                         'operator': 'Türk Telekom',
-                        'name': 'Süper Paket',
+                        'name': 'Mobil Tarifeler',
                         'price': '289 TL',
                         'internet': '30 GB',
                         'minutes': '2000 dk',
                         'sms': '1500 SMS',
-                        'source': 'https://www.turktelekom.com.tr/mobil/kampanyalar/super',
-                        'note': '⚠️ Örnek veri - Kampanya detayı için linke tıklayın'
+                        'source': 'https://www.turktelekom.com.tr/mobil',
+                        'note': '⚠️ Örnek veri - Gerçek kampanyalar için siteyi ziyaret edin'
                     }
                 ]
             
@@ -536,13 +536,13 @@ class TelecomScraper:
             logger.error(f"Error scraping Türk Telekom: {e}")
             campaigns = [{
                 'operator': 'Türk Telekom',
-                'name': 'Scraping Hatası',
+                'name': 'Scraping Hatası - Siteyi Ziyaret Edin',
                 'price': '239 TL',
                 'internet': '20 GB',
                 'minutes': '1500 dk',
                 'sms': '1000 SMS',
-                'source': url if 'url' in locals() else 'https://www.turktelekom.com.tr/mobil',
-                'note': f'⚠️ Hata: {str(e)[:50]} - Örnek veri gösteriliyor'
+                'source': 'https://www.turktelekom.com.tr/mobil/kampanyalar',
+                'note': '⚠️ Scraping hatası - Gerçek kampanyalar için linke tıklayın'
             }]
         
         finally:
