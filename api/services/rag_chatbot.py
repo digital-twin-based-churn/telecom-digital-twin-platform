@@ -279,13 +279,22 @@ class RAGChatbot:
                             
                             | Operatör | Kampanya Adı | Fiyat (TL/ay) | İnternet | Dakika | SMS | Özellikler |
                             |----------|--------------|---------------|----------|--------|-----|------------|
-                            | Turkcell | ... | ... | ... | ... | ... | ... |
-                            | Vodafone | ... | ... | ... | ... | ... | ... |
-                            | Türk Telekom | ... | ... | ... | ... | ... | ... |
+                            | Turkcell | ... | ... | ... | ... | ... | Yeni müşteriye özel, ilk 3 ay indirimli vb. |
+                            | Vodafone | ... | ... | ... | ... | ... | Hediye internet, uygulama paketi vb. |
+                            | Türk Telekom | ... | ... | ... | ... | ... | İlk ay ücretsiz, ekstra GB vb. |
                             
-                            4. Tablo ÜSTÜne şu notu ekle: "🔴 CANLI VERİLER: Aşağıdaki bilgiler operatörlerin resmi sitelerinden anlık olarak çekilmiştir."
+                            4. ÖZELLİKLER KOLONU ZORUNLU:
+                               - Eğer web verilerinde özellik bilgisi varsa onu kullan
+                               - Yoksa kampanya tipine göre genel özellikler yaz:
+                                 * "Yeni müşteriye özel"
+                                 * "İlk 3 ay indirimli" 
+                                 * "Ekstra GB hediye"
+                                 * "Taahhütsüz" veya "12 ay taahhütlü"
+                               - ASLA boş bırakma!
                             
-                            5. Tablonun ALTINA MUTLAKA her kampanyanın kendi linkini ekle:
+                            5. Tablo ÜSTÜne şu notu ekle: "🔴 CANLI VERİLER: Aşağıdaki bilgiler operatörlerin resmi sitelerinden anlık olarak çekilmiştir."
+                            
+                            6. Tablonun ALTINA MUTLAKA her kampanyanın kendi linkini ekle:
                                
                                **📌 Kampanya Detay Linkleri:**
                                
@@ -315,13 +324,18 @@ class RAGChatbot:
                             
                             | Operatör | Kampanya Adı | Fiyat (TL) | İnternet | Dakika | SMS | Özellikler |
                             |----------|--------------|------------|----------|--------|-----|------------|
-                            | Turkcell | [kampanya adı] | [XX TL/ay] | [XX GB] | [XXXX dk] | [XXX] | [özellikler] |
-                            | Vodafone | [kampanya adı] | [XX TL/ay] | [XX GB] | [XXXX dk] | [XXX] | [özellikler] |
-                            | Türk Telekom | [kampanya adı] | [XX TL/ay] | [XX GB] | [XXXX dk] | [XXX] | [özellikler] |
+                            | Turkcell | [kampanya] | [XX TL/ay] | [XX GB] | [XXX dk] | [XXX] | Yeni müşteriye özel, hediye GB vb. |
+                            | Vodafone | [kampanya] | [XX TL/ay] | [XX GB] | [XXX dk] | [XXX] | İlk ay indirimli, ekstra paket vb. |
+                            | Türk Telekom | [kampanya] | [XX TL/ay] | [XX GB] | [XXX dk] | [XXX] | Taahhütsüz, bonus internet vb. |
                             
-                            6. Eğer fiyat yoksa "Fiyat belirtilmemiş" yaz
-                            7. Tablo ÜSTÜne kısa 1-2 cümle ekle
-                            8. Tablonun ALTINA kaynak/tarih/not ekle
+                            6. ÖZELLİKLER KOLONU:
+                               - Web sonuçlarından kampanya özelliklerini çıkar
+                               - Yoksa genel özellikler ekle: "Yeni müşteri", "İlk ay indirim", "Hediye paket" vb.
+                               - ASLA boş bırakma!
+                            
+                            7. Eğer fiyat yoksa "Fiyat belirtilmemiş" yaz
+                            8. Tablo ÜSTÜne kısa 1-2 cümle ekle
+                            9. Tablonun ALTINA kaynak/tarih/not ekle
                             """
                     else:
                         # Normal soru için kısa yanıt
