@@ -16,9 +16,9 @@ except ImportError:
     TavilyClient = None
 
 try:
-    from services.telecom_scraper import get_live_campaigns
+    from services.telecom_scraper import get_all_campaigns
 except ImportError:
-    get_live_campaigns = None
+    get_all_campaigns = None
     logger.warning("Telecom scraper not available")
 
 # Import config
@@ -167,61 +167,30 @@ class RAGChatbot:
         try:
             logger.info(f"Processing chat message: {message}")
             
-            # Check if we need web search or live scraping
+            # Check if this is a campaign comparison query that needs scraping
+            message_lower = message.lower()
+            needs_campaign_data = any(word in message_lower for word in [
+                "kampanya", "paket", "tarife", "karşılaştır", "fiyat"
+            ])
+            
+            # Get live campaign data if available
+            scraped_campaigns = []
+            if needs_campaign_data and get_all_campaigns is not None:
+                logger.info("🔍 Scraping live campaign data from operators...")
+                try:
+                    scraped_campaigns = await asyncio.to_thread(get_all_campaigns)
+                    logger.info(f"✅ Scraped {len(scraped_campaigns)} campaigns")
+                except Exception as e:
+                    logger.error(f"❌ Scraping failed: {e}")
+            
+            # Check if we need web search for current information
             needs_web_search = self._should_search_web(message)
             web_results = []
-            scraped_campaigns = []
             
-            # Check if this is a campaign comparison query
-            message_lower = message.lower()
-            is_campaign_query = any(word in message_lower for word in ["kampanya", "karşılaştır", "paket", "tarife", "fiyat"])
-            
-            # HIZLI MOD: Scraping sadece TABLO istediğinde (yavaş çünkü 3 site taranıyor)
-            # Normal sorgularda sadece Tavily web search kullan (çok hızlı)
-            needs_live_scraping = any(word in message_lower for word in ["tablo", "karşılaştır", "karşılaştırma"]) and \
-                                  any(word in message_lower for word in ["turkcell", "vodafone", "türk telekom"])
-            
-            # Use LIVE SCRAPING only for explicit table comparisons (slow but accurate)
-            if needs_live_scraping and get_live_campaigns is not None:
-                logger.info("=" * 80)
-                logger.info("🔍 LIVE SCRAPING BAŞLATILIYOR!")
-                logger.info("=" * 80)
-                logger.info(f"📝 Sorgu: {message}")
-                logger.info("🌐 Operatör sitelerine gidiliyor: Turkcell, Vodafone, Türk Telekom")
-                logger.info("⏳ Lütfen bekleyin, siteler taranıyor...")
-                
-                try:
-                    scraped_campaigns = await asyncio.to_thread(get_live_campaigns)
-                    logger.info(f"✅ BAŞARILI! {len(scraped_campaigns)} kampanya çekildi!")
-                    logger.info("")
-                    logger.info("📋 ÇEKILEN KAMPANYALAR:")
-                    logger.info("-" * 80)
-                    for camp in scraped_campaigns:
-                        logger.info(f"   🏢 {camp['operator']}")
-                        logger.info(f"   📦 Kampanya: {camp['name']}")
-                        logger.info(f"   💰 Fiyat: {camp['price']}")
-                        logger.info(f"   📶 İnternet: {camp['internet']}")
-                        logger.info(f"   📞 Dakika: {camp['minutes']}")
-                        logger.info(f"   💬 SMS: {camp['sms']}")
-                        logger.info(f"   🔗 Kaynak: {camp['source']}")
-                        if 'note' in camp:
-                            logger.info(f"   ⚠️  Not: {camp['note']}")
-                        logger.info("-" * 80)
-                except Exception as e:
-                    logger.error(f"❌ Scraping hatası: {e}")
-                    import traceback
-                    logger.error(traceback.format_exc())
-                    scraped_campaigns = []
-            else:
-                if is_campaign_query:
-                    logger.warning("⚠️ Kampanya sorgusu tespit edildi ama get_live_campaigns None!")
-                    logger.warning(f"get_live_campaigns type: {type(get_live_campaigns)}")
-            
-            # Fallback to web search if scraping failed or not a campaign query
-            # HIZLI MOD: Daha az sonuç = daha hızlı yanıt
+            # Fallback to web search if scraping failed or not available
             if needs_web_search and not scraped_campaigns and self.tavily_client and self.llm:
-                logger.info("⚡ HIZLI WEB ARAMA yapılıyor...")
-                web_results = self.search_web(message, max_results=3)  # 5->3 hızlandırma
+                logger.info("Performing web search for current information")
+                web_results = self.search_web(message, max_results=3)
             
             # Simple response generation
             if self.llm:
@@ -231,7 +200,7 @@ class RAGChatbot:
                     
                     # Priority 1: Use scraped campaigns (most accurate)
                     if scraped_campaigns:
-                        web_context = "\n\n🔴 CANLI SİTE VERİLERİ (Web Scraping ile çekildi):\n\n"
+                        web_context = "\n\n🔴 CANLI KAMPANYA VERİLERİ (Operatör sitelerinden):\n\n"
                         for campaign in scraped_campaigns:
                             web_context += f"**{campaign['operator']}**\n"
                             web_context += f"  - Kampanya: {campaign['name']}\n"
@@ -239,16 +208,14 @@ class RAGChatbot:
                             web_context += f"  - İnternet: {campaign['internet']}\n"
                             web_context += f"  - Dakika: {campaign['minutes']}\n"
                             web_context += f"  - SMS: {campaign['sms']}\n"
-                            if 'note' in campaign:
-                                web_context += f"  - Not: {campaign['note']}\n"
+                            web_context += f"  - Özellikler: {campaign['features']}\n"
                             web_context += f"  - Kaynak: {campaign['source']}\n\n"
                     
                     # Priority 2: Use web search results (fallback)
                     elif web_results:
-                        web_context = "\n\n⚡ Hızlı Web Arama Sonuçları:\n"
+                        web_context = "\n\nGüncel Web Arama Sonuçları:\n"
                         for i, result in enumerate(web_results, 1):
-                            # HIZLI MOD: Daha kısa snippet (200->120)
-                            web_context += f"{i}. {result['title']}\n   {result['content'][:120]}...\n   Kaynak: {result['url']}\n\n"
+                            web_context += f"{i}. {result['title']}\n   {result['content'][:200]}...\n   Kaynak: {result['url']}\n\n"
                     
                     # Basit selamlaşma kontrolü
                     is_greeting = any(word in message.lower() for word in ["merhaba", "selam", "hello", "hi", "hey"])
@@ -271,78 +238,53 @@ class RAGChatbot:
                     elif needs_table:
                         # Kampanya karşılaştırması - TABLO ZORUNLU
                         if scraped_campaigns:
+                            # Use scraped data for accurate table
                             telecom_prompt = f"""
                             Sen Türk telekomünikasyon sektörü uzmanısın.
                             
                             Kullanıcı sorusu: {message}
                             
-                            🔴 CANLI VERİLER: Aşağıdaki veriler BUGÜN operatörlerin resmi sitelerinden web scraping ile çekildi:
+                            🔴 CANLI VERİLER: Aşağıdaki veriler operatörlerin sitelerinden çekildi:
                             {web_context}
                             
-                            ÇOK ÖNEMLİ - YUKARI YUKARIDAKI CANLI VERİLERİ KULLAN:
+                            ÇOK ÖNEMLİ - YUKARI VERİLERİ KULLAN:
                             1. Yukarıdaki CANLI verileri AYNEN kullan - hiçbir şey uydurma!
                             2. Her operatör için yukarıdaki bilgileri tabloya aktar
                             3. Tablo formatı (Markdown):
                             
-                            | Operatör | Kampanya Adı | Fiyat (TL/ay) | İnternet | Dakika | SMS | Özellikler |
-                            |----------|--------------|---------------|----------|--------|-----|------------|
-                            | Turkcell | ... | ... | ... | ... | ... | Yeni müşteriye özel, ilk 3 ay indirimli vb. |
-                            | Vodafone | ... | ... | ... | ... | ... | Hediye internet, uygulama paketi vb. |
-                            | Türk Telekom | ... | ... | ... | ... | ... | İlk ay ücretsiz, ekstra GB vb. |
+                            | Operatör | Kampanya Adı | Fiyat | İnternet | Dakika | SMS | Özellikler |
+                            |----------|--------------|-------|----------|--------|-----|------------|
+                            | Turkcell | ... | ... | ... | ... | ... | ... |
+                            | Vodafone | ... | ... | ... | ... | ... | ... |
+                            | Türk Telekom | ... | ... | ... | ... | ... | ... |
                             
-                            4. ÖZELLİKLER KOLONU ZORUNLU:
-                               - Eğer web verilerinde özellik bilgisi varsa onu kullan
-                               - Yoksa kampanya tipine göre genel özellikler yaz:
-                                 * "Yeni müşteriye özel"
-                                 * "İlk 3 ay indirimli" 
-                                 * "Ekstra GB hediye"
-                                 * "Taahhütsüz" veya "12 ay taahhütlü"
-                               - ASLA boş bırakma!
-                            
-                            5. Tablo ÜSTÜne şu notu ekle: "🔴 CANLI VERİLER: Aşağıdaki bilgiler operatörlerin resmi sitelerinden anlık olarak çekilmiştir."
-                            
-                            6. Tablonun ALTINA MUTLAKA her kampanyanın kendi linkini ekle:
-                               
-                               **📌 Kampanya Detay Linkleri:**
-                               
-                               Her kampanya için yukarıdaki CANLI VERİLER bölümünde belirtilen "Kaynak" URL'lerini kullan.
-                               Format: 
-                               - [Operatör] - [Kampanya Adı]: [Kaynak URL]
-                               
-                               Örnek:
-                               - Turkcell Yeni Müşteri Paketi: https://www.turkcell.com.tr/kampanya/...
-                               - Vodafone Red Paket: https://www.vodafone.com.tr/kampanya/...
-                               
-                               ⚠️ Fiyatlar değişebilir. Her kampanyanın detayı için yukarıdaki kendi linkine tıklayın.
+                            4. FİYAT ve ÖZELLİKLER kolonlarını MUTLAKA doldur (yukarıda var!)
+                            5. Tablo ÜSTÜne şu notu ekle: "🔴 CANLI VERİLER - Operatör sitelerinden anlık olarak çekildi"
+                            6. Tablonun ALTINA kaynak linklerini ekle (her kampanya için yukarıdaki 'Kaynak' URL'ini kullan)
                             """
                         else:
+                            # Fallback to web search data
                             telecom_prompt = f"""
                             Sen Türk telekomünikasyon sektörü uzmanısın.
                             
                             Kullanıcı sorusu: {message}
                             {web_context}
                             
-                            ÇOK ÖNEMLİ - MUTLAKA TABLO KULLAN VE FİYAT ZORUNLU:
+                            ÇOK ÖNEMLİ - MUTLAKA TABLO KULLAN:
                             1. Yanıtını SADECE tablo formatında ver
-                            2. MUTLAKA 3 operatörü karşılaştır: Turkcell, Vodafone, Türk Telekom
-                            3. FİYAT bilgisi ZORUNLUDUR - her operatör için mutlaka fiyat ekle (TL cinsinden)
-                            4. Web arama sonuçlarından fiyat bilgilerini DİKKATLİCE çıkar
-                            5. Tablo formatı (Markdown):
+                            2. En az 3 operatörü karşılaştır (Turkcell, Vodafone, Türk Telekom)
+                            3. Tablo formatı (Markdown):
                             
-                            | Operatör | Kampanya Adı | Fiyat (TL) | İnternet | Dakika | SMS | Özellikler |
-                            |----------|--------------|------------|----------|--------|-----|------------|
-                            | Turkcell | [kampanya] | [XX TL/ay] | [XX GB] | [XXX dk] | [XXX] | Yeni müşteriye özel, hediye GB vb. |
-                            | Vodafone | [kampanya] | [XX TL/ay] | [XX GB] | [XXX dk] | [XXX] | İlk ay indirimli, ekstra paket vb. |
-                            | Türk Telekom | [kampanya] | [XX TL/ay] | [XX GB] | [XXX dk] | [XXX] | Taahhütsüz, bonus internet vb. |
+                            | Operatör | Kampanya Adı | Fiyat | İnternet | Dakika | SMS | Özellikler |
+                            |----------|--------------|-------|----------|--------|-----|------------|
+                            | Turkcell | ... | ... | ... | ... | ... | ... |
+                            | Vodafone | ... | ... | ... | ... | ... | ... |
+                            | Türk Telekom | ... | ... | ... | ... | ... | ... |
                             
-                            6. ÖZELLİKLER KOLONU:
-                               - Web sonuçlarından kampanya özelliklerini çıkar
-                               - Yoksa genel özellikler ekle: "Yeni müşteri", "İlk ay indirim", "Hediye paket" vb.
-                               - ASLA boş bırakma!
-                            
-                            7. Eğer fiyat yoksa "Fiyat belirtilmemiş" yaz
-                            8. Tablo ÜSTÜne kısa 1-2 cümle ekle
-                            9. Tablonun ALTINA kaynak/tarih/not ekle
+                            4. Web arama sonuçları varsa onları kullan
+                            5. FİYAT bilgisi ZORUNLU - mutlaka fiyat ekle
+                            6. Tablo ÜSTÜne kısa 1-2 cümle ekle
+                            7. Tablonun ALTINA kaynak/not ekle
                             """
                     else:
                         # Normal soru için kısa yanıt
@@ -352,27 +294,25 @@ class RAGChatbot:
                         Kullanıcı sorusu: {message}
                         {web_context}
                         
-                        HIZLI YANIT KURALLARI:
-                        1. ÇOK KISA yanıt ver (maksimum 150 kelime)
-                        2. Madde madde yanıtla (•)
-                        3. Gereksiz açıklama yapma
-                        4. Direkt cevabı ver
+                        KURALLAR:
+                        1. Kısa ve öz yanıt ver (maksimum 300 kelime)
+                        2. Basit sorulara basit yanıt ver
+                        3. Gereksiz detaya girme, sadece sorulan şeyi yanıtla
                         """
                     
                     # Use Google Gemini to generate response with token limit
-                    # HIZLI MOD: Daha düşük token limitleri
                     if is_greeting:
-                        max_tokens = 300  # Selamlaşma çok kısa
+                        max_tokens = 500  # Selamlaşma kısa
                     elif needs_table:
-                        max_tokens = 1200  # Tablo için yeterli
+                        max_tokens = 1500  # Tablo için daha fazla
                     else:
-                        max_tokens = 600  # Normal sorular hızlı
+                        max_tokens = 1000  # Normal sorular
                     
                     response = self.llm.generate_content(
                         telecom_prompt,
                         generation_config=genai.types.GenerationConfig(
                             max_output_tokens=max_tokens,
-                            temperature=0.5,  # Düşürüldü: daha hızlı, daha tutarlı yanıt
+                            temperature=0.7,
                         )
                     )
                     return response.text if response.text else "Üzgünüm, yanıt oluşturulamadı."
@@ -472,15 +412,10 @@ class RAGChatbot:
             
             logger.info(f"Searching web for: {query}")
             
-            # Enhance query for better price results
-            enhanced_query = query
-            if any(word in query.lower() for word in ["kampanya", "fiyat", "tarife"]):
-                enhanced_query = f"{query} fiyat ücret 2025"
-            
-            # Perform web search - HIZLI MOD: basic depth (advanced çok yavaş)
+            # Perform web search
             search_results = self.tavily_client.search(
-                query=enhanced_query,
-                search_depth="basic",  # HIZLI: basic yerine advanced kullanma
+                query=query,
+                search_depth="basic",
                 max_results=max_results,
                 include_answer=True,
                 include_raw_content=False
@@ -497,7 +432,6 @@ class RAGChatbot:
                 })
             
             logger.info(f"Found {len(formatted_results)} web search results")
-            logger.info(f"Results: {[r['title'] for r in formatted_results]}")
             return formatted_results
             
         except Exception as e:
