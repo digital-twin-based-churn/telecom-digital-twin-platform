@@ -183,6 +183,12 @@ class RAGChatbot:
                     # Basit selamlaşma kontrolü
                     is_greeting = any(word in message.lower() for word in ["merhaba", "selam", "hello", "hi", "hey"])
                     
+                    # Kampanya/paket karşılaştırması kontrolü
+                    needs_table = any(word in message.lower() for word in [
+                        "kampanya", "paket", "tarife", "karşılaştır", "fiyat", 
+                        "turkcell", "vodafone", "türk telekom"
+                    ])
+                    
                     if is_greeting:
                         # Selamlaşma için kısa yanıt
                         telecom_prompt = f"""
@@ -192,8 +198,31 @@ class RAGChatbot:
                         Kendini tanıt: Türk telekomünikasyon sektörü konusunda yardımcı bir AI asistanısın.
                         Nasıl yardımcı olabileceğini kısaca sor.
                         """
+                    elif needs_table:
+                        # Kampanya karşılaştırması - TABLO ZORUNLU
+                        telecom_prompt = f"""
+                        Sen Türk telekomünikasyon sektörü uzmanısın.
+                        
+                        Kullanıcı sorusu: {message}
+                        {web_context}
+                        
+                        ÇOK ÖNEMLİ - MUTLAKA TABLO KULLAN:
+                        1. Yanıtını SADECE tablo formatında ver
+                        2. En az 3 operatörü karşılaştır (Turkcell, Vodafone, Türk Telekom)
+                        3. Tablo formatı (Markdown):
+                        
+                        | Operatör | Kampanya Adı | Fiyat | İnternet | Dakika | SMS | Özellikler |
+                        |----------|--------------|-------|----------|--------|-----|------------|
+                        | Turkcell | ... | ... | ... | ... | ... | ... |
+                        | Vodafone | ... | ... | ... | ... | ... | ... |
+                        | Türk Telekom | ... | ... | ... | ... | ... | ... |
+                        
+                        4. Web arama sonuçları varsa onları kullan
+                        5. Tablo ÜSTÜne kısa 1-2 cümle ekle
+                        6. Tablonun ALTINA kaynak/not ekle
+                        """
                     else:
-                        # Normal soru için detaylı yanıt
+                        # Normal soru için kısa yanıt
                         telecom_prompt = f"""
                         Sen Türk telekomünikasyon sektörü konusunda uzman bir AI asistanısın.
                         
@@ -202,22 +231,22 @@ class RAGChatbot:
                         
                         KURALLAR:
                         1. Kısa ve öz yanıt ver (maksimum 300 kelime)
-                        2. SADECE kullanıcı açıkça paket/tarife/kampanya karşılaştırması isterse tablo kullan
-                        3. Basit sorulara basit yanıt ver
-                        4. Eğer tablo kullanıyorsan şu formatta:
-                        
-                        | Paket Adı | Fiyat | İnternet | Dakika | SMS |
-                        |-----------|-------|----------|--------|-----|
-                        | Paket 1   | 50 TL | 10 GB    | 1000   | 100 |
-                        
-                        5. Gereksiz detaya girme, sadece sorulan şeyi yanıtla
+                        2. Basit sorulara basit yanıt ver
+                        3. Gereksiz detaya girme, sadece sorulan şeyi yanıtla
                         """
                     
                     # Use Google Gemini to generate response with token limit
+                    if is_greeting:
+                        max_tokens = 500  # Selamlaşma kısa
+                    elif needs_table:
+                        max_tokens = 1500  # Tablo için daha fazla
+                    else:
+                        max_tokens = 1000  # Normal sorular
+                    
                     response = self.llm.generate_content(
                         telecom_prompt,
                         generation_config=genai.types.GenerationConfig(
-                            max_output_tokens=500 if is_greeting else 1000,  # Selamlaşma kısa, diğerleri orta
+                            max_output_tokens=max_tokens,
                             temperature=0.7,
                         )
                     )
