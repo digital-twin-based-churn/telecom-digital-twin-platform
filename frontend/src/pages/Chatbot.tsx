@@ -72,7 +72,7 @@ const Chatbot = () => {
     }
   ])
 
-  const [conversations] = useState([
+  const [conversations, setConversations] = useState([
     { id: 1, title: "Premium Segment Churn Analizi", active: true, time: "2 dakika önce" },
     { id: 2, title: "Dijital İkiz Simülasyon Sonuçları", active: false, time: "1 saat önce" },
     { id: 3, title: "Müşteri Davranış Kalıpları", active: false, time: "3 saat önce" },
@@ -80,7 +80,7 @@ const Chatbot = () => {
     { id: 5, title: "Yüksek Risk Müşteri Segmentleri", active: false, time: "2 gün önce" }
   ])
 
-  const [recentConversations] = useState([
+  const [recentConversations, setRecentConversations] = useState([
     { id: 6, title: "Churn Tahmin Modeli Performansı", time: "3 gün önce" },
     { id: 7, title: "Müşteri Yaşam Boyu Değer Analizi", time: "4 gün önce" },
     { id: 8, title: "Pazarlama Kampanyası ROI", time: "5 gün önce" }
@@ -89,6 +89,35 @@ const Chatbot = () => {
   const handleLogout = () => {
     logout()
     navigate("/login")
+  }
+
+  const handleClearAllConversations = () => {
+    // Tüm sohbetleri sil
+    setConversations([])
+    setRecentConversations([])
+    // Mesajları başlangıç durumuna getir
+    setMessages([
+      {
+        id: 1,
+        type: "assistant",
+        content: "Merhaba! Dijital İkiz Tabanlı Churn Önleme Sistemi'nin AI asistanıyım. Müşteri davranışlarını analiz etme, churn risklerini tahmin etme ve elde tutma stratejileri önerme konularında size yardımcı olabilirim. Bugün size nasıl yardımcı olabilirim?",
+        timestamp: new Date()
+      }
+    ])
+  }
+
+  const handleNewChat = () => {
+    // Yeni sohbet başlat - mevcut mesajları temizle
+    setMessages([
+      {
+        id: 1,
+        type: "assistant",
+        content: "Merhaba! Dijital İkiz Tabanlı Churn Önleme Sistemi'nin AI asistanıyım. Müşteri davranışlarını analiz etme, churn risklerini tahmin etme ve elde tutma stratejileri önerme konularında size yardımcı olabilirim. Bugün size nasıl yardımcı olabilirim?",
+        timestamp: new Date()
+      }
+    ])
+    // Tüm sohbetleri aktif olmayan duruma getir
+    setConversations(prev => prev.map(conv => ({ ...conv, active: false })))
   }
 
   // Auto-scroll to bottom when new messages arrive
@@ -167,7 +196,10 @@ const Chatbot = () => {
             </div>
           </div>
           
-          <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+          <Button 
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            onClick={handleNewChat}
+          >
             <Plus className="w-5 h-5 mr-2" />
             Yeni Sohbet Başlat
           </Button>
@@ -220,7 +252,13 @@ const Chatbot = () => {
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Sohbet Geçmişi</h3>
-              <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 rounded-lg"
+                onClick={handleClearAllConversations}
+                title="Tüm sohbetleri sil"
+              >
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
