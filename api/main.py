@@ -10,7 +10,7 @@ load_dotenv()
 
 from database import get_db, engine
 from models import Base
-from routers import auth, chatbot
+from routers import auth, chatbot, analytics
 
 try:
     Base.metadata.create_all(bind=engine)
@@ -164,6 +164,7 @@ async def test_database_connection(db: Session = Depends(get_db)):
 
 app.include_router(auth.router)
 app.include_router(chatbot.router)
+app.include_router(analytics.router)
 
 
 if __name__ == "__main__":

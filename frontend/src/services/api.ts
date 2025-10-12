@@ -209,6 +209,43 @@ class ApiService {
       method: 'GET',
     });
   }
+
+  // Analytics API methods
+  async getDashboardSummary(): Promise<any> {
+    return await this.request('/api/analytics/dashboard-summary', {
+      method: 'GET',
+    });
+  }
+
+  async getChurnStats(): Promise<any> {
+    return await this.request('/api/analytics/churn-stats', {
+      method: 'GET',
+    });
+  }
+
+  async getServiceDistribution(): Promise<any> {
+    return await this.request('/api/analytics/service-distribution', {
+      method: 'GET',
+    });
+  }
+
+  async getChurnByService(): Promise<any> {
+    return await this.request('/api/analytics/churn-by-service', {
+      method: 'GET',
+    });
+  }
+
+  async getCustomerSupportImpact(): Promise<any> {
+    return await this.request('/api/analytics/customer-support-impact', {
+      method: 'GET',
+    });
+  }
+
+  async getPaymentAnalysis(): Promise<any> {
+    return await this.request('/api/analytics/payment-analysis', {
+      method: 'GET',
+    });
+  }
 }
 
 export const apiService = new ApiService();

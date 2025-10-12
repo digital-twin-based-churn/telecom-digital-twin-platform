@@ -1,8 +1,15 @@
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/theme-toggle"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { 
   Bot, 
   Users, 
@@ -15,19 +22,44 @@ import {
   Play,
   Home,
   PieChart,
-  LogOut
+  LogOut,
+  Target,
+  Calculator,
+  Megaphone,
+  User,
+  ChevronDown
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
+import { apiService } from "@/services/api"
 
 const Dashboard = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [dashboardData, setDashboardData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   const handleLogout = () => {
     logout()
     navigate("/login")
   }
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+        const data = await apiService.getDashboardSummary()
+        setDashboardData(data)
+      } catch (error) {
+        console.error('Dashboard veri çekme hatası:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,7 +76,7 @@ const Dashboard = () => {
             
             <div className="hidden md:flex items-center space-x-1">
               <Link to="/">
-                <Button variant="ghost" size="sm" className="hover:bg-gray-50 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300">
+                <Button variant="ghost" size="sm">
                   <Home className="w-4 h-4 mr-2" />
                   Ana Sayfa
                 </Button>
@@ -54,19 +86,63 @@ const Dashboard = () => {
                 Panel
               </Button>
               <Link to="/statistics">
-                <Button variant="ghost" size="sm" className="hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-900/20 dark:hover:text-green-400">
+                <Button variant="ghost" size="sm">
                   <PieChart className="w-4 h-4 mr-2" />
                   Analitik
                 </Button>
               </Link>
+              
+              {/* Dropdown for Analysis Tools */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Target className="w-4 h-4 mr-2" />
+                    Analiz Araçları
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <Link to="/risk-analysis">
+                    <DropdownMenuItem>
+                      <Target className="w-4 h-4 mr-2" />
+                      Risk Profil Analizi
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to="/segment-explorer">
+                    <DropdownMenuItem>
+                      <Users className="w-4 h-4 mr-2" />
+                      Segment Explorer
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to="/what-if">
+                    <DropdownMenuItem>
+                      <Calculator className="w-4 h-4 mr-2" />
+                      What-If Analizi
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to="/customer-360">
+                    <DropdownMenuItem>
+                      <User className="w-4 h-4 mr-2" />
+                      Müşteri 360°
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to="/campaign-tracker">
+                    <DropdownMenuItem>
+                      <Megaphone className="w-4 h-4 mr-2" />
+                      Kampanya Tracker
+                    </DropdownMenuItem>
+                  </Link>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
               <Link to="/chatbot">
-                <Button variant="ghost" size="sm" className="hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400">
+                <Button variant="ghost" size="sm">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   AI Asistan
                 </Button>
               </Link>
               <Link to="/simulation">
-                <Button variant="ghost" size="sm" className="hover:bg-purple-50 hover:text-purple-600 dark:hover:bg-purple-900/20 dark:hover:text-purple-400">
+                <Button variant="ghost" size="sm">
                   <Play className="w-4 h-4 mr-2" />
                   Simülasyon
                 </Button>
@@ -106,9 +182,11 @@ const Dashboard = () => {
               <Bot className="h-4 w-4 text-neural" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24,571</div>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : dashboardData?.total_customers?.toLocaleString() || '0'}
+              </div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-success font-medium">+12%</span> geçen aydan beri
+                <span className="text-success font-medium">%{dashboardData?.retention_rate || 0}</span> elde tutma oranı
               </p>
             </CardContent>
           </Card>
@@ -119,9 +197,11 @@ const Dashboard = () => {
               <AlertTriangle className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">23.4%</div>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : `${dashboardData?.churn_rate || 0}%`}
+              </div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-success font-medium">-5.2%</span> geçen aydan beri
+                <span className="text-success font-medium">Çok düşük</span> risk seviyesi
               </p>
             </CardContent>
           </Card>
@@ -132,9 +212,11 @@ const Dashboard = () => {
               <Users className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,847</div>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : dashboardData?.active_customers?.toLocaleString() || '0'}
+              </div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-success font-medium">+18%</span> bu çeyrekte
+                <span className="text-success font-medium">%{dashboardData?.retention_rate || 0}</span> başarı oranı
               </p>
             </CardContent>
           </Card>
@@ -145,9 +227,11 @@ const Dashboard = () => {
               <Shield className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$2.8M</div>
+              <div className="text-2xl font-bold">
+                ${loading ? '...' : dashboardData?.revenue_protected || '0'}M
+              </div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-success font-medium">+24%</span> bu çeyrekte
+                Tahmin edilen aylık gelir koruması
               </p>
             </CardContent>
           </Card>
@@ -174,11 +258,13 @@ const Dashboard = () => {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-destructive">847</p>
+                      <p className="text-2xl font-bold text-destructive">
+                        {loading ? '...' : dashboardData?.risk_distribution?.high_risk?.count?.toLocaleString() || '0'}
+                      </p>
                       <Badge variant="destructive" className="text-xs">Yüksek Öncelik</Badge>
                     </div>
                   </div>
-                  <Progress value={34} className="h-2" />
+                  <Progress value={dashboardData?.risk_distribution?.high_risk?.percentage || 3.4} className="h-2" />
                 </div>
 
                 <div className="space-y-4">
@@ -188,11 +274,13 @@ const Dashboard = () => {
                       <p className="text-xs text-muted-foreground">Kayıp olasılığı %40-70</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-warning">2,341</p>
+                      <p className="text-2xl font-bold text-warning">
+                        {loading ? '...' : dashboardData?.risk_distribution?.medium_risk?.count?.toLocaleString() || '0'}
+                      </p>
                       <Badge variant="secondary" className="text-xs">İzleniyor</Badge>
                     </div>
                   </div>
-                  <Progress value={58} className="h-2" />
+                  <Progress value={dashboardData?.risk_distribution?.medium_risk?.percentage || 6.2} className="h-2" />
                 </div>
 
                 <div className="space-y-4">
@@ -204,11 +292,13 @@ const Dashboard = () => {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-success">21,383</p>
+                      <p className="text-2xl font-bold text-success">
+                        {loading ? '...' : dashboardData?.risk_distribution?.low_risk?.count?.toLocaleString() || '0'}
+                      </p>
                       <Badge className="text-xs bg-success text-success-foreground">Kararlı</Badge>
                     </div>
                   </div>
-                  <Progress value={87} className="h-2" />
+                  <Progress value={dashboardData?.risk_distribution?.low_risk?.percentage || 90.4} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -276,23 +366,47 @@ const Dashboard = () => {
               <CardHeader>
                 <CardTitle>Hızlı İşlemler</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <Link to="/simulation" className="block">
-                  <Button variant="neural" className="w-full justify-start">
-                    <Play className="w-4 h-4 mr-2" />
-                    Simülasyon Çalıştır
+              <CardContent className="space-y-2">
+                <Link to="/risk-analysis" className="block">
+                  <Button variant="outline" className="w-full justify-start text-sm">
+                    <Target className="w-4 h-4 mr-2" />
+                    Risk Analizi
+                  </Button>
+                </Link>
+                <Link to="/segment-explorer" className="block">
+                  <Button variant="outline" className="w-full justify-start text-sm">
+                    <Users className="w-4 h-4 mr-2" />
+                    Segment Explorer
+                  </Button>
+                </Link>
+                <Link to="/what-if" className="block">
+                  <Button variant="outline" className="w-full justify-start text-sm">
+                    <Calculator className="w-4 h-4 mr-2" />
+                    What-If Analizi
+                  </Button>
+                </Link>
+                <Link to="/customer-360" className="block">
+                  <Button variant="outline" className="w-full justify-start text-sm">
+                    <User className="w-4 h-4 mr-2" />
+                    Müşteri 360
+                  </Button>
+                </Link>
+                <Link to="/campaign-tracker" className="block">
+                  <Button variant="outline" className="w-full justify-start text-sm">
+                    <Megaphone className="w-4 h-4 mr-2" />
+                    Kampanya Tracker
                   </Button>
                 </Link>
                 <Link to="/chatbot" className="block">
-                  <Button variant="data" className="w-full justify-start">
+                  <Button variant="data" className="w-full justify-start text-sm">
                     <MessageSquare className="w-4 h-4 mr-2" />
                     AI Asistan
                   </Button>
                 </Link>
-                <Link to="/statistics" className="block">
-                  <Button variant="outline" className="w-full justify-start">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Analitikleri Görüntüle
+                <Link to="/simulation" className="block">
+                  <Button variant="neural" className="w-full justify-start text-sm">
+                    <Play className="w-4 h-4 mr-2" />
+                    Simülasyon
                   </Button>
                 </Link>
               </CardContent>

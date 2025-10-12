@@ -10,6 +10,11 @@ import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Statistics from "./pages/Statistics";
+import RiskAnalysis from "./pages/RiskAnalysis";
+import SegmentExplorer from "./pages/SegmentExplorer";
+import WhatIfAnalysis from "./pages/WhatIfAnalysis";
+import Customer360 from "./pages/Customer360";
+import CampaignTracker from "./pages/CampaignTracker";
 import Chatbot from "./pages/Chatbot";
 import Simulation from "./pages/Simulation";
 import ApiTest from "./pages/ApiTest";
@@ -41,6 +46,46 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Statistics />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/risk-analysis" 
+                element={
+                  <ProtectedRoute>
+                    <RiskAnalysis />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/segment-explorer" 
+                element={
+                  <ProtectedRoute>
+                    <SegmentExplorer />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/what-if" 
+                element={
+                  <ProtectedRoute>
+                    <WhatIfAnalysis />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/customer-360" 
+                element={
+                  <ProtectedRoute>
+                    <Customer360 />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/campaign-tracker" 
+                element={
+                  <ProtectedRoute>
+                    <CampaignTracker />
                   </ProtectedRoute>
                 } 
               />

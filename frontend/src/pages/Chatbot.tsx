@@ -42,7 +42,9 @@ import {
   Network,
   LogOut,
   Mic,
-  MicOff
+  MicOff,
+  Calculator,
+  Megaphone
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
@@ -347,12 +349,42 @@ const Chatbot = () => {
                 Analitik
               </Button>
             </Link>
+            <Link to="/risk-analysis">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-cyan-600 hover:bg-cyan-50/80 dark:text-gray-300 dark:hover:text-cyan-400 dark:hover:bg-cyan-900/20 rounded-lg h-10 font-medium">
+                <Target className="w-4 h-4 mr-3" />
+                Risk
+              </Button>
+            </Link>
+            <Link to="/segment-explorer">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-indigo-600 hover:bg-indigo-50/80 dark:text-gray-300 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg h-10 font-medium">
+                <Users className="w-4 h-4 mr-3" />
+                Segmentler
+              </Button>
+            </Link>
+            <Link to="/what-if">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-pink-600 hover:bg-pink-50/80 dark:text-gray-300 dark:hover:text-pink-400 dark:hover:bg-pink-900/20 rounded-lg h-10 font-medium">
+                <Calculator className="w-4 h-4 mr-3" />
+                What-If
+              </Button>
+            </Link>
+            <Link to="/customer-360">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-orange-600 hover:bg-orange-50/80 dark:text-gray-300 dark:hover:text-orange-400 dark:hover:bg-orange-900/20 rounded-lg h-10 font-medium">
+                <User className="w-4 h-4 mr-3" />
+                Müşteri 360
+              </Button>
+            </Link>
+            <Link to="/campaign-tracker">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-amber-600 hover:bg-amber-50/80 dark:text-gray-300 dark:hover:text-amber-400 dark:hover:bg-amber-900/20 rounded-lg h-10 font-medium">
+                <Megaphone className="w-4 h-4 mr-3" />
+                Kampanyalar
+              </Button>
+            </Link>
             <Button variant="ghost" size="sm" className="w-full justify-start text-blue-600 bg-blue-50/80 dark:text-blue-400 dark:bg-blue-900/20 rounded-lg h-10 font-semibold border border-blue-200/50 dark:border-blue-800/50">
               <MessageSquare className="w-4 h-4 mr-3" />
               AI Asistan
             </Button>
             <Link to="/simulation">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg h-10 font-medium">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-purple-600 hover:bg-purple-50/80 dark:text-gray-300 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 rounded-lg h-10 font-medium">
                 <Play className="w-4 h-4 mr-3" />
                 Simülasyon
               </Button>

@@ -7,6 +7,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ThemeToggle } from "@/components/theme-toggle"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { 
   Bot, 
   BarChart3,
@@ -21,7 +27,11 @@ import {
   Zap,
   CheckCircle,
   AlertCircle,
-  Clock
+  Clock,
+  Calculator,
+  User,
+  Megaphone,
+  ChevronDown
 } from "lucide-react"
 import { Link } from "react-router-dom"
 
@@ -88,6 +98,49 @@ const Simulation = () => {
                   Analitik
                 </Button>
               </Link>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Target className="w-4 h-4 mr-2" />
+                    Analiz Araçları
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <Link to="/risk-analysis">
+                    <DropdownMenuItem>
+                      <Target className="w-4 h-4 mr-2" />
+                      Risk Profil Analizi
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to="/segment-explorer">
+                    <DropdownMenuItem>
+                      <Users className="w-4 h-4 mr-2" />
+                      Segment Explorer
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to="/what-if">
+                    <DropdownMenuItem>
+                      <Calculator className="w-4 h-4 mr-2" />
+                      What-If Analizi
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to="/customer-360">
+                    <DropdownMenuItem>
+                      <User className="w-4 h-4 mr-2" />
+                      Müşteri 360°
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to="/campaign-tracker">
+                    <DropdownMenuItem>
+                      <Megaphone className="w-4 h-4 mr-2" />
+                      Kampanya Tracker
+                    </DropdownMenuItem>
+                  </Link>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
               <Link to="/chatbot">
                 <Button variant="ghost" size="sm">
                   <MessageSquare className="w-4 h-4 mr-2" />
