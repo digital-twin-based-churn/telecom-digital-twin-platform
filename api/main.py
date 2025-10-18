@@ -170,14 +170,13 @@ app.include_router(digital_twin.router)
 
 if __name__ == "__main__":
     import sys
+    import argparse
     
-    port = 8000
-    if len(sys.argv) > 1:
-        try:
-            port = int(sys.argv[1])
-        except ValueError:
-            print(f"Geçersiz port numarası: {sys.argv[1]}. Varsayılan port 8000 kullanılıyor.")
+    parser = argparse.ArgumentParser(description='Backend API Server')
+    parser.add_argument('--port', type=int, default=8000, help='Port number to run the server on')
+    args = parser.parse_args()
     
+    port = args.port
     print(f"Backend başlatılıyor: http://0.0.0.0:{port}")
     print(f"API dokümantasyonu: http://localhost:{port}/swagger")
     uvicorn.run(app, host="0.0.0.0", port=port)

@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { apiService } from "@/services/api"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +42,7 @@ import { useAuth } from "@/contexts/AuthContext"
 const Customer360 = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [customerId, setCustomerId] = useState("")
+  const [customerId, setCustomerId] = useState("1f3f1168-c2b0-41ad-a2f5-19c01f4c80fd")
   const [customerData, setCustomerData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
@@ -50,31 +51,76 @@ const Customer360 = () => {
     navigate("/login")
   }
 
-  const searchCustomer = () => {
+  // Sayfa yüklendiğinde varsayılan müşteri verilerini yükle
+  useEffect(() => {
+    const loadDefaultCustomer = async () => {
+      try {
+        // Varsayılan ID ile müşteri verilerini yükle
+        const response = await apiService.getCustomer360(customerId)
+        if (response.customer_profile) {
+          const profile = response.customer_profile
+          const risk = response.risk_analysis
+          
+          setCustomerData({
+            id: profile.id,
+            age: profile.age,
+            serviceType: profile.service_type,
+            monthlyCharge: profile.monthly_charge,
+            tenure: profile.tenure,
+            dataUsage: profile.data_usage,
+            supportCalls: profile.support_calls,
+            autoPayment: profile.auto_payment,
+            satisfaction: profile.satisfaction_score,
+            riskScore: risk.risk_score,
+            riskLevel: risk.risk_level,
+            predictedChurn: risk.predicted_churn,
+            riskFactors: risk.risk_factors,
+            recommendations: response.recommendations
+          })
+        }
+      } catch (error) {
+        console.error('Error loading default customer:', error)
+      }
+    }
+    
+    loadDefaultCustomer()
+  }, []) // Sadece component mount olduğunda çalışsın
+
+  const searchCustomer = async () => {
+    if (!customerId.trim()) return
+    
     setLoading(true)
-    // Simulate customer data (gerçekte API'den gelecek)
-    setTimeout(() => {
-      setCustomerData({
-        id: customerId || "12345",
-        name: "Ahmet Yılmaz",
-        email: "ahmet.yilmaz@example.com",
-        phone: "+90 532 123 4567",
-        age: 35,
-        serviceType: "Postpaid",
-        monthlyCharge: 189,
-        tenure: 24,
-        dataUsage: 25,
-        supportCalls: 3,
-        autoPayment: true,
-        satisfaction: "Yüksek",
-        riskScore: 23,
-        riskLevel: "Düşük",
-        lastActivity: "2 gün önce",
-        totalRevenue: 4536,
-        predictedChurn: "14%"
-      })
+    try {
+      const response = await apiService.getCustomer360(customerId)
+      if (response.customer_profile) {
+        const profile = response.customer_profile
+        const risk = response.risk_analysis
+        
+        setCustomerData({
+          id: profile.id,
+          age: profile.age,
+          serviceType: profile.service_type,
+          monthlyCharge: profile.monthly_charge,
+          tenure: profile.tenure,
+          dataUsage: profile.data_usage,
+          supportCalls: profile.support_calls,
+          autoPayment: profile.auto_payment,
+          satisfaction: profile.satisfaction_score,
+          riskScore: risk.risk_score,
+          riskLevel: risk.risk_level,
+          predictedChurn: risk.predicted_churn,
+          riskFactors: risk.risk_factors,
+          recommendations: response.recommendations
+        })
+      } else {
+        setCustomerData(null)
+      }
+    } catch (error) {
+      console.error('Customer search error:', error)
+      setCustomerData(null)
+    } finally {
       setLoading(false)
-    }, 1000)
+    }
   }
 
   return (
@@ -159,12 +205,18 @@ const Customer360 = () => {
         {/* Search */}
         <Card className="mb-6">
           <CardContent className="pt-6">
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                <strong>Test için:</strong> Sayfa yüklendiğinde otomatik olarak örnek müşteri gösterilir. 
+                Farklı bir müşteri aramak için ID girin ve "Ara" butonuna tıklayın.
+              </p>
+            </div>
             <div className="flex gap-4">
               <div className="flex-1">
                 <Label htmlFor="customer-id">Müşteri ID veya Telefon</Label>
                 <Input
                   id="customer-id"
-                  placeholder="Müşteri ID girin..."
+                  placeholder="Örnek ID: 1f3f1168-c2b0-41ad-a2f5-19c01f4c80fd"
                   value={customerId}
                   onChange={(e) => setCustomerId(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && searchCustomer()}
@@ -196,22 +248,22 @@ const Customer360 = () => {
                       <div className="flex items-start space-x-3">
                         <User className="w-5 h-5 text-muted-foreground mt-1" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Ad Soyad</p>
-                          <p className="font-semibold">{customerData.name}</p>
+                          <p className="text-sm text-muted-foreground">Müşteri ID</p>
+                          <p className="font-semibold">{customerData.id}</p>
                         </div>
                       </div>
                       <div className="flex items-start space-x-3">
-                        <Mail className="w-5 h-5 text-muted-foreground mt-1" />
+                        <Calendar className="w-5 h-5 text-muted-foreground mt-1" />
                         <div>
-                          <p className="text-sm text-muted-foreground">E-posta</p>
-                          <p className="font-semibold">{customerData.email}</p>
+                          <p className="text-sm text-muted-foreground">Yaş</p>
+                          <p className="font-semibold">{customerData.age}</p>
                         </div>
                       </div>
                       <div className="flex items-start space-x-3">
-                        <Phone className="w-5 h-5 text-muted-foreground mt-1" />
+                        <Activity className="w-5 h-5 text-muted-foreground mt-1" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Telefon</p>
-                          <p className="font-semibold">{customerData.phone}</p>
+                          <p className="text-sm text-muted-foreground">Hizmet Türü</p>
+                          <p className="font-semibold">{customerData.serviceType}</p>
                         </div>
                       </div>
                     </div>
@@ -234,8 +286,8 @@ const Customer360 = () => {
                       <div className="flex items-start space-x-3">
                         <Activity className="w-5 h-5 text-muted-foreground mt-1" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Son Aktivite</p>
-                          <p className="font-semibold">{customerData.lastActivity}</p>
+                          <p className="text-sm text-muted-foreground">Veri Kullanımı</p>
+                          <p className="font-semibold">{customerData.dataUsage} GB</p>
                         </div>
                       </div>
                     </div>
@@ -311,8 +363,8 @@ const Customer360 = () => {
                     </div>
 
                     <div className="p-3 rounded-lg bg-muted">
-                      <p className="text-xs text-muted-foreground">Toplam Gelir</p>
-                      <p className="text-lg font-bold">{customerData.totalRevenue.toLocaleString()} TL</p>
+                      <p className="text-xs text-muted-foreground">Destek Araması</p>
+                      <p className="text-lg font-bold">{customerData.supportCalls}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -320,18 +372,39 @@ const Customer360 = () => {
 
               <Card className="animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
                 <CardHeader>
+                  <CardTitle>Risk Faktörleri</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {customerData.riskFactors && customerData.riskFactors.length > 0 ? (
+                    customerData.riskFactors.map((factor: string, index: number) => (
+                      <div key={index} className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20">
+                        <p className="text-sm font-medium">• {factor}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                      <p className="text-sm font-medium">• Risk faktörü bulunamadı</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="animate-slide-in-right" style={{ animationDelay: '0.3s' }}>
+                <CardHeader>
                   <CardTitle>Önerilen Aksiyonlar</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                    <p className="text-sm font-medium">• Sadakat programına dahil et</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
-                    <p className="text-sm font-medium">• Premium hizmet yükseltmesi öner</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                    <p className="text-sm font-medium">• Ekstra veri paketi kampanyası</p>
-                  </div>
+                  {customerData.recommendations && customerData.recommendations.length > 0 ? (
+                    customerData.recommendations.map((recommendation: string, index: number) => (
+                      <div key={index} className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                        <p className="text-sm font-medium">• {recommendation}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/20">
+                      <p className="text-sm font-medium">• Öneri bulunamadı</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

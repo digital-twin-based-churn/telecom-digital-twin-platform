@@ -189,6 +189,13 @@ class ApiService {
     });
   }
 
+  // Customer 360 API methods
+  async getCustomer360(customerId: string): Promise<any> {
+    return await this.request(`/api/analytics/customer-360/${customerId}`, {
+      method: 'GET',
+    });
+  }
+
   async getCompetitorAnalysis(updateData: boolean = false): Promise<any> {
     return await this.request('/api/chatbot/competitor-analysis', {
       method: 'POST',
