@@ -47,6 +47,9 @@ def get_spark(app_name: str = "Multi-Model Churn Scoring Service") -> SparkSessi
     os.environ["PYSPARK_PYTHON"] = sys.executable
     os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
     
+    # Force local IP to avoid network issues
+    os.environ["SPARK_LOCAL_IP"] = "127.0.0.1"
+    
     # Respect local temp dirs if provided
     local_dirs = os.getenv("SPARK_LOCAL_DIRS") or os.getenv("SPARK_LOCAL_DIR")
     builder = (
@@ -62,6 +65,12 @@ def get_spark(app_name: str = "Multi-Model Churn Scoring Service") -> SparkSessi
         .config("parquet.enable.summary-metadata", "false")
         .config("spark.pyspark.python", sys.executable)
         .config("spark.pyspark.driver.python", sys.executable)
+        .config("spark.driver.host", "127.0.0.1")
+        .config("spark.driver.bindAddress", "127.0.0.1")
+        .config("spark.executor.hostname", "127.0.0.1")
+        .config("spark.network.timeout", "300s")
+        .config("spark.rpc.askTimeout", "300s")
+        .config("spark.rpc.lookupTimeout", "300s")
     )
     if local_dirs:
         builder = builder.config("spark.local.dir", local_dirs)
