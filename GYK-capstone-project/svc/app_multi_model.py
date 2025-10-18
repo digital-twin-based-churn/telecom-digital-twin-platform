@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, Query, HTTPException, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from pyspark.sql import SparkSession, DataFrame
@@ -112,6 +113,15 @@ class ScoreRequest(BaseModel):
 
 
 app = FastAPI(title="Multi-Model Churn Scoring Service", version="2.0.0")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 
 # Globals initialized at startup
@@ -258,6 +268,11 @@ def list_models() -> Dict[str, Any]:
         "artifacts_directory": str(ART_DIR)
     }
 
+
+@app.options("/score")
+async def score_options():
+    """Handle CORS preflight requests"""
+    return {"message": "OK"}
 
 @app.post("/score")
 def score(request: ScoreRequest) -> Dict[str, Any]:

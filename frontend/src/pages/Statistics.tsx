@@ -39,7 +39,7 @@ const Statistics = () => {
               <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
                 <Bot className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">ChurnGuard AI</span>
+              <span className="text-xl font-bold">TelecomAI</span>
             </Link>
             
             <div className="hidden md:flex items-center space-x-1">

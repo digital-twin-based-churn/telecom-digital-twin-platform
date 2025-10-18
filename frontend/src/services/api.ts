@@ -289,15 +289,12 @@ class ApiService {
     });
   }
 
-  // GYK ML Service churn prediction
+  // GYK ML Service churn prediction via Backend API
   async predictChurn(data: any): Promise<any> {
-    return await fetch('http://localhost:8000/score', {
+    return await this.request('/api/analytics/churn-prediction', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
-    }).then(res => res.json());
+    });
   }
 }
 

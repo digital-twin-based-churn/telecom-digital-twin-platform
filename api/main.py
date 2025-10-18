@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import uvicorn
@@ -23,7 +23,7 @@ app = FastAPI(
     title="Dijital İkiz Tabanlı Churn Önleme Projesi API",
     description="FastAPI ile geliştirilmiş  Dijital İkiz Tabanlı Churn Önleme Projesi API'si",
     version="1.0.0",
-    docs_url="/docs",
+    docs_url="/swagger",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
     servers=[
@@ -167,11 +167,6 @@ app.include_router(chatbot.router)
 app.include_router(analytics.router)
 app.include_router(digital_twin.router)
 
-# Favicon endpoint
-@app.get("/favicon.ico")
-async def favicon():
-    return FileResponse("favicon.ico", media_type="image/x-icon")
-
 
 if __name__ == "__main__":
     import sys
@@ -184,5 +179,5 @@ if __name__ == "__main__":
             print(f"Geçersiz port numarası: {sys.argv[1]}. Varsayılan port 8000 kullanılıyor.")
     
     print(f"Backend başlatılıyor: http://0.0.0.0:{port}")
-    print(f"API dokümantasyonu: http://localhost:{port}/docs")
+    print(f"API dokümantasyonu: http://localhost:{port}/swagger")
     uvicorn.run(app, host="0.0.0.0", port=port)

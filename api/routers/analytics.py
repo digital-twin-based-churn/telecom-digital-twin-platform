@@ -4,6 +4,7 @@ Analytics endpoints for dashboard data using GYK-capstone-project
 from fastapi import APIRouter, HTTPException
 from typing import Dict, List, Any
 import logging
+import requests
 
 from services.analytics_service import analytics_service
 
@@ -48,17 +49,6 @@ async def get_service_distribution() -> List[Dict[str, Any]]:
         return analytics_service.get_service_type_distribution()
     except Exception as e:
         logger.error(f"Error getting service distribution: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/churn-by-service")
-async def get_churn_by_service() -> List[Dict[str, Any]]:
-    """
-    Get churn data by service type from GYK data
-    """
-    try:
-        return analytics_service.get_churn_by_service_type()
-    except Exception as e:
-        logger.error(f"Error getting churn by service: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/model-performance")
@@ -127,17 +117,6 @@ async def get_campaign_roi() -> Dict[str, Any]:
         logger.error(f"Error getting campaign ROI: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/segment-analysis")
-async def get_segment_analysis() -> Dict[str, Any]:
-    """
-    Get detailed segment analysis from GYK data
-    """
-    try:
-        return analytics_service.get_segment_analysis()
-    except Exception as e:
-        logger.error(f"Error getting segment analysis: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 @router.get("/health")
 async def analytics_health() -> Dict[str, Any]:
     """
@@ -156,3 +135,24 @@ async def analytics_health() -> Dict[str, Any]:
             "status": "unhealthy",
             "error": str(e)
         }
+
+@router.post("/churn-prediction")
+async def predict_churn(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Predict churn using GYK ML Service
+    """
+    try:
+        # Add auto-generated ID if not provided
+        if "id" not in data or not data["id"]:
+            import uuid
+            data["id"] = f"customer_{uuid.uuid4().hex[:8]}"
+        
+        # Forward request to ML Service
+        ml_service_url = "http://localhost:8000/score"
+        response = requests.post(ml_service_url, json=data, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"ML Service error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")

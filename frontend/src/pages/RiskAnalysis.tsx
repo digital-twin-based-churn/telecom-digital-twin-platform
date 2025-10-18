@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import {
@@ -40,6 +41,7 @@ import {
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
+import { apiService } from "@/services/api"
 
 const RiskAnalysis = () => {
   const { user, logout } = useAuth()
@@ -54,6 +56,27 @@ const RiskAnalysis = () => {
   const [dataUsage, setDataUsage] = useState([20])
   const [tenure, setTenure] = useState([24])
   
+  // Churn prediction form
+  const [churnForm, setChurnForm] = useState({
+    age: 35,
+    tenure: 24,
+    service_type: "Postpaid",
+    avg_call_duration: 100,
+    data_usage: 20,
+    roaming_usage: 0,
+    monthly_charge: 150,
+    overdue_payments: 0,
+    auto_payment: true,
+    avg_top_up_count: 0,
+    call_drops: 0,
+    customer_support_calls: 5,
+    satisfaction_score: 4,
+    apps: ["WhatsApp"]
+  })
+  
+  const [churnResult, setChurnResult] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  
   // Risk calculation
   const [riskScore, setRiskScore] = useState(0)
   const [riskLevel, setRiskLevel] = useState("Düşük")
@@ -62,6 +85,26 @@ const RiskAnalysis = () => {
   const handleLogout = () => {
     logout()
     navigate("/login")
+  }
+
+  const handleChurnPrediction = async () => {
+    setIsLoading(true)
+    try {
+      const result = await apiService.predictChurn(churnForm)
+      console.log('Churn prediction result:', result)
+      setChurnResult(result)
+    } catch (error) {
+      console.error('Churn prediction error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleFormChange = (field: string, value: any) => {
+    setChurnForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   // Calculate risk score based on inputs
@@ -165,7 +208,7 @@ const RiskAnalysis = () => {
               <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
                 <Bot className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">ChurnGuard AI</span>
+              <span className="text-xl font-bold">TelecomAI</span>
             </Link>
             
             <div className="hidden md:flex items-center space-x-1">
@@ -263,9 +306,9 @@ const RiskAnalysis = () => {
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8 animate-fade-up">
-          <h1 className="text-3xl font-bold mb-2">Müşteri Risk Profil Analizi</h1>
+          <h1 className="text-3xl font-bold mb-2">Müşteri Risk Profil Analizi ve Churn Tahmini</h1>
           <p className="text-muted-foreground">
-            Gerçek EDA verileriyle anlık müşteri kayıp riski tahmini ve akıllı öneriler
+            AI destekli gerçek zamanlı churn tahmini ve akıllı risk analizi ile müşteri kaybını önleyin
           </p>
         </div>
 
@@ -435,6 +478,171 @@ const RiskAnalysis = () => {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Churn Prediction Form */}
+            <Card className="animate-fade-up border-2 border-dashed border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50/50 to-blue-50/50 dark:from-blue-900/20 dark:to-blue-900/20">
+              <CardHeader className="text-center pb-4">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mb-3">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                  AI Churn Tahmini
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Gelişmiş ML modelleri ile gerçek zamanlı churn riski analizi
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Yaş</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.age}
+                      onChange={(e) => handleFormChange('age', parseInt(e.target.value))}
+                      className="border-2 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Müşteri Süresi (Ay)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.tenure}
+                      onChange={(e) => handleFormChange('tenure', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Servis Türü</Label>
+                    <Select value={churnForm.service_type} onValueChange={(value) => handleFormChange('service_type', value)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Postpaid">Postpaid</SelectItem>
+                        <SelectItem value="Prepaid">Prepaid</SelectItem>
+                        <SelectItem value="Broadband">Broadband</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Ortalama Arama Süresi (Dakika)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.avg_call_duration}
+                      onChange={(e) => handleFormChange('avg_call_duration', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Veri Kullanımı (GB)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.data_usage}
+                      onChange={(e) => handleFormChange('data_usage', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Roaming Kullanımı (GB)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.roaming_usage}
+                      onChange={(e) => handleFormChange('roaming_usage', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Aylık Ücret (TL)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.monthly_charge}
+                      onChange={(e) => handleFormChange('monthly_charge', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Geciken Ödemeler</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.overdue_payments}
+                      onChange={(e) => handleFormChange('overdue_payments', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Otomatik Ödeme</Label>
+                    <Select value={churnForm.auto_payment.toString()} onValueChange={(value) => handleFormChange('auto_payment', value === 'true')}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Evet</SelectItem>
+                        <SelectItem value="false">Hayır</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Ortalama Top-up Sayısı</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.avg_top_up_count}
+                      onChange={(e) => handleFormChange('avg_top_up_count', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Arama Düşmeleri</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.call_drops}
+                      onChange={(e) => handleFormChange('call_drops', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Müşteri Destek Çağrıları</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.customer_support_calls}
+                      onChange={(e) => handleFormChange('customer_support_calls', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Memnuniyet Skoru (1-5)</Label>
+                    <Input 
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={churnForm.satisfaction_score}
+                      onChange={(e) => handleFormChange('satisfaction_score', parseFloat(e.target.value))}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-center pt-4">
+                  <Button 
+                    onClick={handleChurnPrediction}
+                    disabled={isLoading}
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        AI Tahmin Ediliyor...
+                      </>
+                    ) : (
+                      <>
+                        <Target className="w-5 h-5 mr-2" />
+                        Churn Tahmini Yap
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
           </div>
 
           {/* Risk Results Sidebar */}
@@ -570,6 +778,68 @@ const RiskAnalysis = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Churn Prediction Results */}
+            {churnResult && (
+              <Card className="animate-slide-in-right border-2 border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50/50 to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20">
+                <CardHeader className="text-center pb-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full mb-3">
+                    <BarChart3 className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                    AI Tahmin Sonuçları
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    Gerçek zamanlı ML modeli analizi tamamlandı
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="p-6 rounded-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-2 border-red-200 dark:border-red-800">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">%</span>
+                          </div>
+                          <p className="text-sm font-semibold text-red-700 dark:text-red-300">Churn Olasılığı</p>
+                        </div>
+                        <p className="text-3xl font-bold text-red-600">
+                          {(churnResult.churn_probability * 100).toFixed(0)}%
+                        </p>
+                      </div>
+                      
+                      <div className={`p-6 rounded-xl border-2 ${churnResult.churn_prediction ? 'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-200 dark:border-red-800' : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800'}`}>
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${churnResult.churn_prediction ? 'bg-red-500' : 'bg-green-500'}`}>
+                            {churnResult.churn_prediction ? (
+                              <XCircle className="w-4 h-4 text-white" />
+                            ) : (
+                              <CheckCircle className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                          <p className={`text-sm font-semibold ${churnResult.churn_prediction ? 'text-red-700 dark:text-red-300' : 'text-green-700 dark:text-green-300'}`}>Tahmin</p>
+                        </div>
+                        <p className={`text-2xl font-bold ${churnResult.churn_prediction ? 'text-red-600' : 'text-green-600'}`}>
+                          {churnResult.churn_prediction ? "CHURN" : "NO CHURN"}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-xs">ML</span>
+                        </div>
+                        <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">Model</p>
+                      </div>
+                      <p className="text-lg font-semibold text-blue-600 break-words">
+                        {churnResult.model_used}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
