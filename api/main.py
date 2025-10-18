@@ -27,10 +27,10 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
     servers=[
-        {"url": "http://localhost:8000", "description": "Local server (port 8000) - ACTIVE"},
-        {"url": "http://127.0.0.1:8000", "description": "Local server (127.0.0.1:8000)"},
-        {"url": "http://localhost:8081", "description": "Local server (port 8081) - Frontend"},
-        {"url": "http://127.0.0.1:8081", "description": "Local server (127.0.0.1:8081) - Frontend"}
+        {"url": "http://localhost:8001", "description": "Backend API (port 8001) - ACTIVE"},
+        {"url": "http://127.0.0.1:8001", "description": "Backend API (127.0.0.1:8001)"},
+        {"url": "http://localhost:8000", "description": "GYK ML Service (port 8000)"},
+        {"url": "http://127.0.0.1:8000", "description": "GYK ML Service (127.0.0.1:8000)"}
     ]
 )
 
