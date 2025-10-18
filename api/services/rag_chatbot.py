@@ -167,8 +167,42 @@ class RAGChatbot:
         try:
             logger.info(f"Processing chat message: {message}")
             
+            # Handle simple greetings first
+            message_lower = message.lower().strip()
+            
+            # Check for greeting patterns
+            greeting_patterns = [
+                "selam", "merhaba", "hello", "hi", "hey", "selamlar", "merhabalar",
+                "günaydın", "iyi günler", "iyi akşamlar", "iyi geceler",
+                "good morning", "good afternoon", "good evening", "good night",
+                "nasılsın", "nasılsınız", "how are you", "what's up"
+            ]
+            
+            # Check if message contains any greeting word
+            contains_greeting = any(greeting in message_lower for greeting in greeting_patterns)
+            
+            # Check for simple greeting combinations
+            simple_greeting_combinations = [
+                "selam merhaba", "merhaba selam", "hello hi", "hi hello",
+                "selam nasılsın", "merhaba nasılsın", "hello how are you"
+            ]
+            
+            # Check if it's a simple greeting or combination
+            is_simple_greeting = (
+                message_lower in greeting_patterns or
+                message_lower in simple_greeting_combinations or
+                (contains_greeting and len(message_lower.split()) <= 3) or
+                message_lower.startswith("selam ") or
+                message_lower.startswith("merhaba ") or
+                message_lower.startswith("hello ") or
+                message_lower.startswith("hi ")
+            )
+            
+            if is_simple_greeting:
+                return "Merhaba! Dijital İkiz Tabanlı Churn Önleme Sistemi'nin AI asistanıyım. Telekomünikasyon sektörü, churn analizi, müşteri davranışları ve elde tutma stratejileri konularında size yardımcı olabilirim. Bugün size nasıl yardımcı olabilirim?"
+            
+            
             # Check if this is a campaign comparison query that needs scraping
-            message_lower = message.lower()
             needs_campaign_data = any(word in message_lower for word in [
                 "kampanya", "paket", "tarife", "karşılaştır", "fiyat"
             ])
@@ -327,6 +361,7 @@ class RAGChatbot:
         except Exception as e:
             logger.error(f"Error in chat: {e}")
             return f"Üzgünüm, bir hata oluştu: {str(e)}"
+    
 
     def _should_search_web(self, message: str) -> bool:
         """Determine if the message requires web search for current information"""
