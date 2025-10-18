@@ -1,0 +1,12 @@
+pyspark
+click
+pandas
+ydata-profiling
+notebook
+findspark
+
+fastapi
+uvicorn
+python-multipart
+
+

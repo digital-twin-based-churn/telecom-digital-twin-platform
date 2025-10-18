@@ -1,5 +1,5 @@
 """
-Analytics endpoints for dashboard data
+Analytics endpoints for dashboard data using GYK-capstone-project
 """
 from fastapi import APIRouter, HTTPException
 from typing import Dict, List, Any
@@ -17,7 +17,7 @@ router = APIRouter(
 @router.get("/dashboard-summary")
 async def get_dashboard_summary() -> Dict[str, Any]:
     """
-    Get comprehensive dashboard summary with real EDA data
+    Get comprehensive dashboard summary with real GYK data
     """
     try:
         summary = analytics_service.get_dashboard_summary()
@@ -31,7 +31,7 @@ async def get_dashboard_summary() -> Dict[str, Any]:
 @router.get("/churn-stats")
 async def get_churn_stats() -> Dict[str, Any]:
     """
-    Get churn statistics
+    Get churn statistics from GYK data
     """
     try:
         return analytics_service.get_churn_statistics()
@@ -42,7 +42,7 @@ async def get_churn_stats() -> Dict[str, Any]:
 @router.get("/service-distribution")
 async def get_service_distribution() -> List[Dict[str, Any]]:
     """
-    Get service type distribution
+    Get service type distribution from GYK data
     """
     try:
         return analytics_service.get_service_type_distribution()
@@ -53,7 +53,7 @@ async def get_service_distribution() -> List[Dict[str, Any]]:
 @router.get("/churn-by-service")
 async def get_churn_by_service() -> List[Dict[str, Any]]:
     """
-    Get churn distribution by service type
+    Get churn data by service type from GYK data
     """
     try:
         return analytics_service.get_churn_by_service_type()
@@ -61,26 +61,81 @@ async def get_churn_by_service() -> List[Dict[str, Any]]:
         logger.error(f"Error getting churn by service: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/customer-support-impact")
-async def get_customer_support_impact() -> List[Dict[str, Any]]:
+@router.get("/model-performance")
+async def get_model_performance() -> Dict[str, Any]:
     """
-    Get customer support impact on churn
+    Get model performance metrics from GYK artifacts
     """
     try:
-        return analytics_service.get_customer_support_impact()
+        return analytics_service.get_model_performance()
     except Exception as e:
-        logger.error(f"Error getting support impact: {e}")
+        logger.error(f"Error getting model performance: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/payment-analysis")
-async def get_payment_analysis() -> List[Dict[str, Any]]:
+@router.get("/percentile-analysis")
+async def get_percentile_analysis() -> Dict[str, Any]:
     """
-    Get auto payment vs churn analysis
+    Get percentile analysis from EDA data
     """
     try:
-        return analytics_service.get_payment_analysis()
+        return analytics_service.get_percentile_analysis()
     except Exception as e:
-        logger.error(f"Error getting payment analysis: {e}")
+        logger.error(f"Error getting percentile analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/service-comparison")
+async def get_service_comparison() -> List[Dict[str, Any]]:
+    """
+    Get service type comparison metrics
+    """
+    try:
+        return analytics_service.get_service_comparison()
+    except Exception as e:
+        logger.error(f"Error getting service comparison: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/key-insights")
+async def get_key_insights() -> Dict[str, Any]:
+    """
+    Get key insights from EDA data
+    """
+    try:
+        return analytics_service.get_key_insights()
+    except Exception as e:
+        logger.error(f"Error getting key insights: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/revenue-analysis")
+async def get_revenue_analysis() -> Dict[str, Any]:
+    """
+    Get revenue and cost analysis from GYK data
+    """
+    try:
+        return analytics_service.get_revenue_analysis()
+    except Exception as e:
+        logger.error(f"Error getting revenue analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/campaign-roi")
+async def get_campaign_roi() -> Dict[str, Any]:
+    """
+    Get campaign ROI analysis from GYK data
+    """
+    try:
+        return analytics_service.get_campaign_roi()
+    except Exception as e:
+        logger.error(f"Error getting campaign ROI: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/segment-analysis")
+async def get_segment_analysis() -> Dict[str, Any]:
+    """
+    Get detailed segment analysis from GYK data
+    """
+    try:
+        return analytics_service.get_segment_analysis()
+    except Exception as e:
+        logger.error(f"Error getting segment analysis: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/health")
@@ -93,11 +148,11 @@ async def analytics_health() -> Dict[str, Any]:
         return {
             "status": "healthy",
             "data_available": churn_stats['total_customers'] > 0,
-            "total_customers": churn_stats['total_customers']
+            "total_customers": churn_stats['total_customers'],
+            "data_source": "GYK-capstone-project"
         }
     except Exception as e:
         return {
             "status": "unhealthy",
             "error": str(e)
         }
-

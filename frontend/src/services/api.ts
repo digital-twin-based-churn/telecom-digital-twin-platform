@@ -246,6 +246,48 @@ class ApiService {
       method: 'GET',
     });
   }
+
+  async getKeyInsights(): Promise<any> {
+    return await this.request('/api/analytics/key-insights', {
+      method: 'GET',
+    });
+  }
+
+  async getServiceComparison(): Promise<any> {
+    return await this.request('/api/analytics/service-comparison', {
+      method: 'GET',
+    });
+  }
+
+  async getModelPerformance(): Promise<any> {
+    return await this.request('/api/analytics/model-performance', {
+      method: 'GET',
+    });
+  }
+
+  async getPercentileAnalysis(): Promise<any> {
+    return await this.request('/api/analytics/percentile-analysis', {
+      method: 'GET',
+    });
+  }
+
+  async getRevenueAnalysis(): Promise<any> {
+    return await this.request('/api/analytics/revenue-analysis', {
+      method: 'GET',
+    });
+  }
+
+  async getCampaignROI(): Promise<any> {
+    return await this.request('/api/analytics/campaign-roi', {
+      method: 'GET',
+    });
+  }
+
+  async getSegmentAnalysis(): Promise<any> {
+    return await this.request('/api/analytics/segment-analysis', {
+      method: 'GET',
+    });
+  }
 }
 
 export const apiService = new ApiService();

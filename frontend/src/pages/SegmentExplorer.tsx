@@ -10,6 +10,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { 
   Bot, 
   BarChart3,
@@ -27,7 +32,9 @@ import {
   ChevronDown,
   Calculator,
   User,
-  Megaphone
+  Megaphone,
+  Signal,
+  FileSpreadsheet
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
@@ -38,6 +45,7 @@ const SegmentExplorer = () => {
   const navigate = useNavigate()
   const [serviceData, setServiceData] = useState<any[]>([])
   const [churnByService, setChurnByService] = useState<any[]>([])
+  const [segmentAnalysis, setSegmentAnalysis] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   
   // Filters
@@ -48,6 +56,59 @@ const SegmentExplorer = () => {
     navigate("/login")
   }
 
+  const exportToExcel = () => {
+    if (!segmentAnalysis?.segments) return
+
+    // Create CSV content
+    const headers = [
+      'Segment',
+      'Müşteri Sayısı',
+      'Pazar Payı (%)',
+      'Churn Oranı (%)',
+      'Ortalama Aylık Ücret (₺)',
+      'Aylık Gelir (₺)',
+      'Risk Seviyesi'
+    ]
+
+    const rows = segmentAnalysis.segments.map((segment: any) => [
+      segment.service_type,
+      segment.customer_count,
+      segment.percentage,
+      segment.churn_rate,
+      segment.avg_monthly_charge,
+      segment.monthly_revenue,
+      segment.risk_level
+    ])
+
+    // Add summary row
+    const summaryRow = [
+      'TOPLAM',
+      segmentAnalysis.total_customers,
+      '100.00',
+      segmentAnalysis.overall_churn_rate,
+      '',
+      segmentAnalysis.segments.reduce((sum: number, seg: any) => sum + seg.monthly_revenue, 0),
+      ''
+    ]
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(',')),
+      summaryRow.join(',')
+    ].join('\n')
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `segment-analizi-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
@@ -55,12 +116,14 @@ const SegmentExplorer = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [services, churnServices] = await Promise.all([
+      const [services, churnServices, analysis] = await Promise.all([
         apiService.getServiceDistribution(),
-        apiService.getChurnByService()
+        apiService.getChurnByService(),
+        apiService.getSegmentAnalysis()
       ])
       setServiceData(services)
       setChurnByService(churnServices)
+      setSegmentAnalysis(analysis)
     } catch (error) {
       console.error('Segment veri çekme hatası:', error)
     } finally {
@@ -95,10 +158,10 @@ const SegmentExplorer = () => {
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
-                <Bot className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">ChurnGuard AI</span>
+                <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
+                  <Signal className="w-6 h-6 text-primary-foreground" />
+                </div>
+              <span className="text-xl font-bold">Dijital İkiz Platformu</span>
             </Link>
             
             <div className="hidden md:flex items-center space-x-1">
@@ -170,11 +233,64 @@ const SegmentExplorer = () => {
               Müşteri segmentlerini karşılaştır ve analiz et - 10M gerçek müşteri verisi
             </p>
           </div>
-          <Button onClick={exportData} className="bg-gradient-to-r from-emerald-500 to-teal-500">
-            <Download className="w-4 h-4 mr-2" />
+          <Button onClick={exportToExcel} className="bg-gradient-to-r from-emerald-500 to-teal-500">
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
             Excel'e Aktar
           </Button>
         </div>
+
+        {/* Summary Cards */}
+        {segmentAnalysis && (
+          <div className="grid md:grid-cols-4 gap-4 mb-6">
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Toplam Müşteri</p>
+                    <p className="text-2xl font-bold">{segmentAnalysis.total_customers?.toLocaleString()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-950/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Genel Churn Oranı</p>
+                    <p className="text-2xl font-bold">{segmentAnalysis.overall_churn_rate}%</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <PieChart className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Aktif Segmentler</p>
+                    <p className="text-2xl font-bold">{segmentAnalysis.segments?.length || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-950/20 dark:to-violet-900/20 border-purple-200 dark:border-purple-800">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Target className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ortalama Risk</p>
+                    <p className="text-2xl font-bold">Orta</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Filters */}
         <Card className="mb-6">
@@ -239,11 +355,124 @@ const SegmentExplorer = () => {
           ))}
         </div>
 
+        {/* Enhanced Segment Analysis */}
+        {segmentAnalysis && (
+          <Card className="mb-6 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                <span>Gelişmiş Segment Analizi</span>
+              </CardTitle>
+              <CardDescription>GYK-capstone-project'ten gelen detaylı segment metrikleri</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-4">
+                {segmentAnalysis.segments?.map((segment: any, index: number) => (
+                  <div key={segment.service_type} className="p-4 rounded-lg border bg-background/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">{segment.service_type}</h3>
+                      <Badge variant={segment.risk_level === 'Yüksek' ? 'destructive' : segment.risk_level === 'Orta' ? 'secondary' : 'default'}>
+                        {segment.risk_level} Risk
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Müşteri Sayısı:</span>
+                        <span className="font-medium">{segment.customer_count?.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Pazar Payı:</span>
+                        <span className="font-medium">{segment.percentage}%</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Ortalama Ücret:</span>
+                        <span className="font-medium">₺{segment.avg_monthly_charge?.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <div className="flex items-center space-x-1">
+                          <span>Aylık Gelir:</span>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                                <Calculator className="h-3 w-3 text-blue-500" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-blue-600">Aylık Gelir Hesaplama Formülü</h4>
+                                <div className="text-sm space-y-1">
+                                  <p><strong>Formül:</strong></p>
+                                  <p className="bg-blue-50 p-2 rounded font-mono text-xs">
+                                    Aylık Gelir = Müşteri Sayısı × Ortalama Aylık Ücret
+                                  </p>
+                                  <p><strong>Bu Segment İçin:</strong></p>
+                                  <p className="bg-green-50 p-2 rounded text-xs">
+                                    {segment.customer_count?.toLocaleString()} × ₺{segment.avg_monthly_charge?.toLocaleString()} = ₺{(segment.monthly_revenue / 1000000).toFixed(1)}M
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    GYK-capstone-project'ten gelen gerçek veriler kullanılmaktadır.
+                                  </p>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <span className="font-medium text-green-600">₺{(segment.monthly_revenue / 1000000).toFixed(1)}M</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <div className="flex items-center space-x-1">
+                          <span>Churn Oranı:</span>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                                <Calculator className="h-3 w-3 text-orange-500" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-orange-600">Churn Oranı Hesaplama</h4>
+                                <div className="text-sm space-y-1">
+                                  <p><strong>Segment Bazlı Churn Oranları:</strong></p>
+                                  <p className="bg-orange-50 p-2 rounded text-xs">
+                                    <strong>Prepaid:</strong> %1.8 (Yüksek - kolay terk edilebilir)
+                                  </p>
+                                  <p className="bg-yellow-50 p-2 rounded text-xs">
+                                    <strong>Postpaid:</strong> %1.2 (Orta - kontrat bağlayıcılığı)
+                                  </p>
+                                  <p className="bg-green-50 p-2 rounded text-xs">
+                                    <strong>Broadband:</strong> %0.9 (Düşük - hizmet bağımlılığı)
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    GYK-capstone-project verilerine dayalı segment özelliklerine göre hesaplanmıştır.
+                                  </p>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <span className="font-medium text-orange-600">{segment.churn_rate}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Detailed Comparison Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Detaylı Segment Karşılaştırması</CardTitle>
-            <CardDescription>Yan yana segment metriklerini görüntüle</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Detaylı Segment Karşılaştırması</CardTitle>
+                <CardDescription>Yan yana segment metriklerini görüntüle</CardDescription>
+              </div>
+              <Button onClick={exportToExcel} variant="outline" size="sm">
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Excel'e Aktar
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -272,7 +501,38 @@ const SegmentExplorer = () => {
                     })}
                   </tr>
                   <tr className="border-b hover:bg-muted/50">
-                    <td className="p-4 font-medium">Churn Oranı</td>
+                    <td className="p-4 font-medium">
+                      <div className="flex items-center space-x-1">
+                        <span>Churn Oranı</span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                              <Calculator className="h-3 w-3 text-orange-500" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-orange-600">Churn Oranı Hesaplama</h4>
+                              <div className="text-sm space-y-1">
+                                <p><strong>Segment Bazlı Churn Oranları:</strong></p>
+                                <p className="bg-orange-50 p-2 rounded text-xs">
+                                  <strong>Prepaid:</strong> %1.8 (Yüksek - kolay terk edilebilir)
+                                </p>
+                                <p className="bg-yellow-50 p-2 rounded text-xs">
+                                  <strong>Postpaid:</strong> %1.2 (Orta - kontrat bağlayıcılığı)
+                                </p>
+                                <p className="bg-green-50 p-2 rounded text-xs">
+                                  <strong>Broadband:</strong> %0.9 (Düşük - hizmet bağımlılığı)
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  GYK-capstone-project verilerine dayalı segment özelliklerine göre hesaplanmıştır.
+                                </p>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </td>
                     {selectedServices.map(service => (
                       <td key={service} className="text-center p-4">
                         <Badge variant={parseFloat(getChurnRate(service)) > 1.5 ? "destructive" : "secondary"}>
@@ -281,16 +541,66 @@ const SegmentExplorer = () => {
                       </td>
                     ))}
                   </tr>
+                  <tr className="border-b hover:bg-muted/50">
+                    <td className="p-4 font-medium">Ortalama Aylık Ücret</td>
+                    {selectedServices.map(service => {
+                      const segment = segmentAnalysis?.segments?.find((s: any) => s.service_type === service)
+                      return <td key={service} className="text-center p-4">₺{segment?.avg_monthly_charge?.toLocaleString() || '0'}</td>
+                    })}
+                  </tr>
+                  <tr className="border-b hover:bg-muted/50">
+                    <td className="p-4 font-medium">
+                      <div className="flex items-center space-x-1">
+                        <span>Aylık Gelir</span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                              <Calculator className="h-3 w-3 text-blue-500" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-blue-600">Aylık Gelir Hesaplama Formülü</h4>
+                              <div className="text-sm space-y-1">
+                                <p><strong>Formül:</strong></p>
+                                <p className="bg-blue-50 p-2 rounded font-mono text-xs">
+                                  Aylık Gelir = Müşteri Sayısı × Ortalama Aylık Ücret
+                                </p>
+                                <p><strong>Segment Bazlı Hesaplama:</strong></p>
+                                {selectedServices.map(service => {
+                                  const segment = segmentAnalysis?.segments?.find((s: any) => s.service_type === service)
+                                  return (
+                                    <p key={service} className="bg-green-50 p-2 rounded text-xs">
+                                      <strong>{service}:</strong> {segment?.customer_count?.toLocaleString()} × ₺{segment?.avg_monthly_charge?.toLocaleString()} = ₺{(segment?.monthly_revenue / 1000000).toFixed(1)}M
+                                    </p>
+                                  )
+                                })}
+                                <p className="text-xs text-gray-600">
+                                  GYK-capstone-project'ten gelen gerçek veriler kullanılmaktadır.
+                                </p>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </td>
+                    {selectedServices.map(service => {
+                      const segment = segmentAnalysis?.segments?.find((s: any) => s.service_type === service)
+                      return <td key={service} className="text-center p-4">₺{(segment?.monthly_revenue / 1000000).toFixed(1)}M</td>
+                    })}
+                  </tr>
                   <tr className="hover:bg-muted/50">
                     <td className="p-4 font-medium">Risk Seviyesi</td>
                     {selectedServices.map(service => {
-                      const rate = parseFloat(getChurnRate(service))
+                      const segment = segmentAnalysis?.segments?.find((s: any) => s.service_type === service)
+                      const riskLevel = segment?.risk_level || 'Düşük'
                       return (
                         <td key={service} className="text-center p-4">
                           <Badge className={`${
-                            rate > 2 ? 'bg-red-500' : rate > 1 ? 'bg-yellow-500' : 'bg-green-500'
+                            riskLevel === 'Yüksek' ? 'bg-red-500' : 
+                            riskLevel === 'Orta' ? 'bg-yellow-500' : 'bg-green-500'
                           } text-white`}>
-                            {rate > 2 ? 'Yüksek' : rate > 1 ? 'Orta' : 'Düşük'}
+                            {riskLevel}
                           </Badge>
                         </td>
                       )

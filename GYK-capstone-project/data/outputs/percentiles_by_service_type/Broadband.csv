@@ -1,0 +1,12 @@
+service_type,column,p01,p05,p50,p90,p95,p99
+Broadband,age,18.0,18.0,34.0,50.0,54.0,62.0
+Broadband,avg_call_duration,,,,,,
+Broadband,avg_top_up_count,0.0,0.0,0.0,0.0,0.0,0.0
+Broadband,call_drops,,,,,,
+Broadband,customer_support_calls,0.0,1.0,10.0,18.0,19.0,20.0
+Broadband,data_usage,2.11,10.1,100.03,179.89,189.82,197.81
+Broadband,monthly_charge,202.99,215.01,349.87,469.78,484.76,496.72
+Broadband,overdue_payments,0.0,0.0,2.0,5.0,5.0,5.0
+Broadband,roaming_usage,,,,,,
+Broadband,satisfaction_score,1.09,1.45,5.5,9.09,9.54,9.9
+Broadband,tenure,4.0,16.0,159.0,286.0,305.0,408.0

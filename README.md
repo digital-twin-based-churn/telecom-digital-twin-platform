@@ -15,6 +15,13 @@ cp .env.example .env
 
 ### 2️⃣ Backend'i Başlatın
 
+**Yöntem 1: Başlatma Scripti (Önerilen)**
+```bash
+cd api
+./start_backend.sh
+```
+
+**Yöntem 2: Manuel Başlatma**
 ```bash
 # Virtual environment oluşturun (ilk seferde)
 cd api
@@ -24,12 +31,15 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # Bağımlılıkları yükleyin
 pip install -r requirements.txt
 
-# Backend'i başlatın
-python main.py 8000
+# Backend'i başlatın (varsayılan port: 8000)
+python main.py
 ```
 
-Backend: http://localhost:8000  
-API Docs: http://localhost:8000/swagger
+**Backend Bilgileri:**
+- Backend: http://localhost:8000  
+- API Docs: http://localhost:8000/swagger
+- Health Check: http://localhost:8000/health
+- **Not:** Backend varsayılan olarak 8000 portunda çalışır (frontend 8081'de)
 
 ### 3️⃣ Frontend'i Başlatın
 
@@ -42,7 +52,7 @@ npm install
 npm run dev
 ```
 
-Frontend: http://localhost:8080
+Frontend: http://localhost:8081 (veya http://localhost:5173)
 
 ### 4️⃣ Docker (Opsiyonel - PostgreSQL)
 
@@ -237,11 +247,19 @@ Tüm environment değişkenlerini görmek için:
 ```bash
 # Port'u kullanan process'i bulun
 lsof -i :8000  # Backend
-lsof -i :8080  # Frontend
+lsof -i :8081  # Frontend
 
 # Process'i sonlandırın
 kill -9 <PID>
 ```
+
+### Port Çakışması
+- **Backend:** Port 8000 (varsayılan)
+- **Frontend:** Port 8081 veya 5173 (Vite varsayılanı)
+- Eğer port çakışması yaşıyorsanız, backend'i farklı bir portta başlatabilirsiniz:
+  ```bash
+  python main.py 9000  # 9000 portunda başlatır
+  ```
 
 ---
 

@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "split_mode": "stratified",
+    "n_total": 3332346,
+    "neg": 3270615,
+    "pos": 61731,
+    "scale_pos_weight": 52.98172717111338,
+    "features": [
+      "avg_call_duration",
+      "call_drops",
+      "roaming_usage",
+      "auto_payment",
+      "tenure",
+      "age",
+      "apps_count",
+      "customer_support_calls",
+      "data_usage",
+      "monthly_charge",
+      "overdue_payments",
+      "satisfaction_score",
+      "avg_top_up_count",
+      "avg_call_duration_missing",
+      "call_drops_missing",
+      "data_usage_missing",
+      "monthly_charge_missing",
+      "auto_payment_missing",
+      "overdue_ratio",
+      "support_calls_rate",
+      "charge_per_gb",
+      "drops_per_min",
+      "usage_per_tenure",
+      "charge_per_tenure",
+      "has_overdue_flag",
+      "satisfaction_low",
+      "has_any_app",
+      "log_charge_x_log_usage"
+    ],
+    "timestamp": "2025-10-14T09:27:21.796947Z"
+  },
+  "metrics": {
+    "test_uncalibrated": {
+      "auc_roc": 0.7829124321652042,
+      "auc_pr": 0.057281905770452723,
+      "brier": 0.19404391301978324
+    },
+    "test_calibrated": {
+      "auc_roc": 0.7826519950154823,
+      "auc_pr": 0.06001189937667929,
+      "brier": 0.017955393536962183
+    },
+    "precision_at_1pct": 0.09113903394255875,
+    "precision_at_5pct": 0.05276199223159788,
+    "best_threshold_val": 0.058,
+    "best_threshold_val_f1": 0.11526249723104189
+  },
+  "paths": {
+    "model_dir": "artifacts/postpaid_baseline_20251014_121336\\gbt_model",
+    "calibration_dir": "artifacts/postpaid_baseline_20251014_121336\\calibration_isotonic",
+    "calibration_curve_json": "artifacts/postpaid_baseline_20251014_121336\\calibration_curve.json",
+    "report_json": "artifacts/postpaid_baseline_20251014_121336\\report.json",
+    "gbt_saved": false
+  }
+}

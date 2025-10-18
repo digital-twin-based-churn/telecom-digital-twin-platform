@@ -1,0 +1,217 @@
+{
+  "test_scenarios": {
+    "Postpaid": {
+      "low_risk": {
+        "scenario_name": "Sadık Postpaid Müşteri",
+        "description": "Uzun süreli, memnun, düşük riskli müşteri",
+        "expected_result": "NO_CHURN",
+        "test_data": {
+          "id": "postpaid_sadik_musteri",
+          "service_type": "Postpaid",
+          "age": 45,
+          "tenure": 36,
+          "avg_call_duration": 80.0,
+          "data_usage": 1.5,
+          "roaming_usage": 0.0,
+          "monthly_charge": 35.0,
+          "overdue_payments": 0,
+          "auto_payment": true,
+          "call_drops": 0,
+          "customer_support_calls": 0,
+          "satisfaction_score": 4.8,
+          "apps": [
+            "WhatsApp",
+            "Instagram"
+          ]
+        },
+        "actual_result": {
+          "probability": 0.06730524699652107,
+          "threshold": 0.15,
+          "prediction": "NO_CHURN",
+          "correct": true,
+          "timestamp": "2025-10-18T07:38:37Z",
+          "model_used": "postpaid_model_gbt"
+        }
+      },
+      "high_risk": {
+        "scenario_name": "Problemli Postpaid Müşteri",
+        "description": "Kısa süreli, memnuniyetsiz, yüksek riskli müşteri",
+        "expected_result": "CHURN",
+        "test_data": {
+          "id": "postpaid_problemli_musteri",
+          "service_type": "Postpaid",
+          "age": 25,
+          "tenure": 3,
+          "avg_call_duration": 200.0,
+          "data_usage": 8.0,
+          "roaming_usage": 2.0,
+          "monthly_charge": 80.0,
+          "overdue_payments": 3,
+          "auto_payment": false,
+          "call_drops": 15,
+          "customer_support_calls": 8,
+          "satisfaction_score": 2.1,
+          "apps": [
+            "WhatsApp",
+            "Instagram",
+            "TikTok",
+            "YouTube",
+            "Netflix"
+          ]
+        },
+        "actual_result": {
+          "probability": 0.2393956128971142,
+          "threshold": 0.15,
+          "prediction": "CHURN",
+          "correct": true,
+          "timestamp": "2025-10-18T07:38:37Z",
+          "model_used": "postpaid_model_gbt"
+        }
+      }
+    },
+    "Prepaid": {
+      "low_risk": {
+        "scenario_name": "Sadık Prepaid Müşteri",
+        "description": "Düzenli top-up yapan, memnun müşteri",
+        "expected_result": "NO_CHURN",
+        "test_data": {
+          "id": "prepaid_sadik_musteri",
+          "service_type": "Prepaid",
+          "age": 30,
+          "tenure": 12,
+          "avg_call_duration": 60.0,
+          "data_usage": 2.0,
+          "roaming_usage": 0.5,
+          "monthly_charge": 25.0,
+          "avg_top_up_count": 2,
+          "call_drops": 1,
+          "customer_support_calls": 0,
+          "satisfaction_score": 4.5,
+          "apps": [
+            "WhatsApp",
+            "Instagram"
+          ]
+        },
+        "actual_result": {
+          "probability": 0.0011651866751704852,
+          "threshold": 0.08,
+          "prediction": "NO_CHURN",
+          "correct": true,
+          "timestamp": "2025-10-18T07:38:37Z",
+          "model_used": "prepaid_model_rf"
+        }
+      },
+      "high_risk": {
+        "scenario_name": "Problemli Prepaid Müşteri",
+        "description": "Çok fazla top-up yapan, memnuniyetsiz müşteri",
+        "expected_result": "CHURN",
+        "test_data": {
+          "id": "prepaid_problemli_musteri",
+          "service_type": "Prepaid",
+          "age": 22,
+          "tenure": 2,
+          "avg_call_duration": 300.0,
+          "data_usage": 10.0,
+          "roaming_usage": 5.0,
+          "monthly_charge": 60.0,
+          "avg_top_up_count": 8,
+          "call_drops": 20,
+          "customer_support_calls": 5,
+          "satisfaction_score": 2.0,
+          "apps": [
+            "WhatsApp",
+            "Instagram",
+            "TikTok",
+            "YouTube",
+            "Netflix",
+            "Spotify"
+          ]
+        },
+        "actual_result": {
+          "probability": 0.11857280462069493,
+          "threshold": 0.08,
+          "prediction": "CHURN",
+          "correct": true,
+          "timestamp": "2025-10-18T07:38:38Z",
+          "model_used": "prepaid_model_rf"
+        }
+      }
+    },
+    "Broadband": {
+      "low_risk": {
+        "scenario_name": "Sadık Broadband Müşteri",
+        "description": "Uzun süreli, otomatik ödeme, memnun müşteri",
+        "expected_result": "NO_CHURN",
+        "test_data": {
+          "id": "broadband_sadik_musteri",
+          "service_type": "Broadband",
+          "age": 40,
+          "tenure": 24,
+          "data_usage": 50.0,
+          "monthly_charge": 45.0,
+          "overdue_payments": 0,
+          "auto_payment": true,
+          "customer_support_calls": 0,
+          "satisfaction_score": 4.7,
+          "apps": [
+            "WhatsApp",
+            "Instagram",
+            "Netflix"
+          ]
+        },
+        "actual_result": {
+          "probability": 0.0022023030496715465,
+          "threshold": 0.01,
+          "prediction": "NO_CHURN",
+          "correct": true,
+          "timestamp": "2025-10-18T07:38:38Z",
+          "model_used": "broadband_model_rf"
+        }
+      },
+      "high_risk": {
+        "scenario_name": "Problemli Broadband Müşteri",
+        "description": "Yüksek kullanım, gecikmiş ödemeler, memnuniyetsiz müşteri",
+        "expected_result": "CHURN",
+        "test_data": {
+          "id": "broadband_problemli_musteri",
+          "service_type": "Broadband",
+          "age": 28,
+          "tenure": 6,
+          "data_usage": 200.0,
+          "monthly_charge": 80.0,
+          "overdue_payments": 4,
+          "auto_payment": false,
+          "customer_support_calls": 6,
+          "satisfaction_score": 2.3,
+          "apps": [
+            "WhatsApp",
+            "Instagram",
+            "TikTok",
+            "YouTube",
+            "Netflix",
+            "Spotify",
+            "Discord"
+          ]
+        },
+        "actual_result": {
+          "probability": 0.0014522557468663359,
+          "threshold": 0.01,
+          "prediction": "NO_CHURN",
+          "correct": false,
+          "timestamp": "2025-10-18T07:38:38Z",
+          "model_used": "broadband_model_rf"
+        }
+      }
+    }
+  },
+  "test_summary": {
+    "total_scenarios": 6,
+    "correct_predictions": 5,
+    "incorrect_predictions": 1,
+    "accuracy": 0.8333333333333334,
+    "test_date": "2025-10-18",
+    "test_time": "10:38:38"
+  },
+  "test_date": "2025-10-18",
+  "test_environment": "Production ML Service"
+}

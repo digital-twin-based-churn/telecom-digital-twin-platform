@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Large data files - exclude from git
+GYK-capstone-project/data/capstone.*.jsonl
+GYK-capstone-project/venv/
+
 # C extensions
 *.so
 

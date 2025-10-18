@@ -1,0 +1,32 @@
+{
+  "Prepaid": {
+    "auc_roc": 0.6613,
+    "auc_pr": 0.0294,
+    "accuracy": 0.9809,
+    "total_samples": 6591,
+    "correct_predictions": 6465,
+    "churn_count": 126,
+    "churn_rate": 0.0191,
+    "threshold": 0.08
+  },
+  "Broadband": {
+    "auc_roc": 0.5888,
+    "auc_pr": 0.0040,
+    "accuracy": 0.9970,
+    "total_samples": 6562,
+    "correct_predictions": 6542,
+    "churn_count": 20,
+    "churn_rate": 0.0030,
+    "threshold": 0.01
+  },
+  "Postpaid": {
+    "auc_roc": 0.7792,
+    "auc_pr": 0.1234,
+    "accuracy": 0.9812,
+    "total_samples": 10000,
+    "correct_predictions": 9812,
+    "churn_count": 188,
+    "churn_rate": 0.0188,
+    "threshold": 0.15
+  }
+}

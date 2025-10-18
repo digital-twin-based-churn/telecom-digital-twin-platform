@@ -10,7 +10,7 @@ load_dotenv()
 
 from database import get_db, engine
 from models import Base
-from routers import auth, chatbot, analytics
+from routers import auth, chatbot, analytics, digital_twin
 
 try:
     Base.metadata.create_all(bind=engine)
@@ -27,10 +27,10 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
     servers=[
-        {"url": "http://localhost:8081", "description": "Local server (port 8081) - ACTIVE"},
-        {"url": "http://127.0.0.1:8081", "description": "Local server (127.0.0.1:8081)"},
-        {"url": "http://localhost:8000", "description": "Local server (port 8000) - INACTIVE"},
-        {"url": "http://127.0.0.1:8000", "description": "Local server (127.0.0.1:8000) - INACTIVE"}
+        {"url": "http://localhost:8000", "description": "Local server (port 8000) - ACTIVE"},
+        {"url": "http://127.0.0.1:8000", "description": "Local server (127.0.0.1:8000)"},
+        {"url": "http://localhost:8081", "description": "Local server (port 8081) - Frontend"},
+        {"url": "http://127.0.0.1:8081", "description": "Local server (127.0.0.1:8081) - Frontend"}
     ]
 )
 
@@ -165,17 +165,18 @@ async def test_database_connection(db: Session = Depends(get_db)):
 app.include_router(auth.router)
 app.include_router(chatbot.router)
 app.include_router(analytics.router)
+app.include_router(digital_twin.router)
 
 
 if __name__ == "__main__":
     import sys
     
-    port = 8081
+    port = 8000
     if len(sys.argv) > 1:
         try:
             port = int(sys.argv[1])
         except ValueError:
-            print(f"Geçersiz port numarası: {sys.argv[1]}. Varsayılan port 8081 kullanılıyor.")
+            print(f"Geçersiz port numarası: {sys.argv[1]}. Varsayılan port 8000 kullanılıyor.")
     
     print(f"Backend başlatılıyor: http://0.0.0.0:{port}")
     print(f"API dokümantasyonu: http://localhost:{port}/swagger")

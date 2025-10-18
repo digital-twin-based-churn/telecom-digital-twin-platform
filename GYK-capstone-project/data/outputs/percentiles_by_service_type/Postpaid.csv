@@ -1,0 +1,12 @@
+service_type,column,p01,p05,p50,p90,p95,p99
+Postpaid,age,18.0,18.0,34.0,50.0,54.0,62.0
+Postpaid,avg_call_duration,2.2,6.96,60.39,107.99,113.95,118.7
+Postpaid,avg_top_up_count,0.0,0.0,0.0,0.0,0.0,0.0
+Postpaid,call_drops,0.0,1.0,10.0,18.0,19.0,20.0
+Postpaid,customer_support_calls,0.0,1.0,10.0,18.0,19.0,20.0
+Postpaid,data_usage,2.15,10.1,100.02,179.84,189.83,197.83
+Postpaid,monthly_charge,51.55,97.46,614.4,1074.08,1131.36,1177.43
+Postpaid,overdue_payments,0.0,0.0,2.0,5.0,5.0,5.0
+Postpaid,roaming_usage,0.61,3.01,29.97,53.95,56.94,59.35
+Postpaid,satisfaction_score,1.09,1.45,5.5,9.09,9.54,9.9
+Postpaid,tenure,4.0,16.0,159.0,286.0,305.0,408.0

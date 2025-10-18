@@ -1,0 +1,12 @@
+service_type,column,p01,p05,p50,p90,p95,p99
+Prepaid,age,18.0,18.0,19.0,27.0,29.0,33.0
+Prepaid,avg_call_duration,2.2,6.98,60.49,108.0,113.94,118.7
+Prepaid,avg_top_up_count,5.0,9.0,52.0,91.0,96.0,99.0
+Prepaid,call_drops,0.0,1.0,10.0,18.0,19.0,20.0
+Prepaid,customer_support_calls,0.0,1.0,10.0,18.0,19.0,20.0
+Prepaid,data_usage,2.12,10.1,99.82,179.81,189.82,197.82
+Prepaid,monthly_charge,54.63,153.55,1264.18,2251.26,2374.79,2473.05
+Prepaid,overdue_payments,0.0,0.0,0.0,0.0,0.0,0.0
+Prepaid,roaming_usage,0.6,3.0,29.96,53.94,56.93,59.34
+Prepaid,satisfaction_score,1.09,1.45,5.49,9.09,9.54,9.9
+Prepaid,tenure,4.0,16.0,150.0,270.0,285.0,297.0
