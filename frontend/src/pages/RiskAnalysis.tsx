@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import {
@@ -40,6 +41,7 @@ import {
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
+import { apiService } from "@/services/api"
 
 const RiskAnalysis = () => {
   const { user, logout } = useAuth()
@@ -54,6 +56,28 @@ const RiskAnalysis = () => {
   const [dataUsage, setDataUsage] = useState([20])
   const [tenure, setTenure] = useState([24])
   
+  // Churn prediction form
+  const [churnForm, setChurnForm] = useState({
+    id: "",
+    age: 35,
+    tenure: 24,
+    service_type: "Postpaid",
+    avg_call_duration: 100,
+    data_usage: 20,
+    roaming_usage: 0,
+    monthly_charge: 150,
+    overdue_payments: 0,
+    auto_payment: true,
+    avg_top_up_count: 0,
+    call_drops: 0,
+    customer_support_calls: 5,
+    satisfaction_score: 4,
+    apps: ["WhatsApp"]
+  })
+  
+  const [churnResult, setChurnResult] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  
   // Risk calculation
   const [riskScore, setRiskScore] = useState(0)
   const [riskLevel, setRiskLevel] = useState("Düşük")
@@ -62,6 +86,25 @@ const RiskAnalysis = () => {
   const handleLogout = () => {
     logout()
     navigate("/login")
+  }
+
+  const handleChurnPrediction = async () => {
+    setIsLoading(true)
+    try {
+      const result = await apiService.predictChurn(churnForm)
+      setChurnResult(result)
+    } catch (error) {
+      console.error('Churn prediction error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleFormChange = (field: string, value: any) => {
+    setChurnForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   // Calculate risk score based on inputs
@@ -435,6 +478,208 @@ const RiskAnalysis = () => {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Churn Prediction Form */}
+            <Card className="animate-fade-up">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Target className="w-5 h-5" />
+                  <span>Churn Tahmini</span>
+                </CardTitle>
+                <CardDescription>
+                  Müşteri bilgilerini girerek churn riskini tahmin edin
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Müşteri ID</Label>
+                    <Input 
+                      value={churnForm.id}
+                      onChange={(e) => handleFormChange('id', e.target.value)}
+                      placeholder="Müşteri ID"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Yaş</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.age}
+                      onChange={(e) => handleFormChange('age', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Müşteri Süresi (Ay)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.tenure}
+                      onChange={(e) => handleFormChange('tenure', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Servis Türü</Label>
+                    <Select value={churnForm.service_type} onValueChange={(value) => handleFormChange('service_type', value)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Postpaid">Postpaid</SelectItem>
+                        <SelectItem value="Prepaid">Prepaid</SelectItem>
+                        <SelectItem value="Broadband">Broadband</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Ortalama Arama Süresi (Dakika)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.avg_call_duration}
+                      onChange={(e) => handleFormChange('avg_call_duration', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Veri Kullanımı (GB)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.data_usage}
+                      onChange={(e) => handleFormChange('data_usage', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Roaming Kullanımı (GB)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.roaming_usage}
+                      onChange={(e) => handleFormChange('roaming_usage', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Aylık Ücret (TL)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.monthly_charge}
+                      onChange={(e) => handleFormChange('monthly_charge', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Geciken Ödemeler</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.overdue_payments}
+                      onChange={(e) => handleFormChange('overdue_payments', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Otomatik Ödeme</Label>
+                    <Select value={churnForm.auto_payment.toString()} onValueChange={(value) => handleFormChange('auto_payment', value === 'true')}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Evet</SelectItem>
+                        <SelectItem value="false">Hayır</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Ortalama Top-up Sayısı</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.avg_top_up_count}
+                      onChange={(e) => handleFormChange('avg_top_up_count', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Arama Düşmeleri</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.call_drops}
+                      onChange={(e) => handleFormChange('call_drops', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Müşteri Destek Çağrıları</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.customer_support_calls}
+                      onChange={(e) => handleFormChange('customer_support_calls', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Memnuniyet Skoru (1-5)</Label>
+                    <Input 
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={churnForm.satisfaction_score}
+                      onChange={(e) => handleFormChange('satisfaction_score', parseFloat(e.target.value))}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={handleChurnPrediction}
+                    disabled={isLoading}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500"
+                  >
+                    {isLoading ? "Tahmin Ediliyor..." : "Churn Tahmini Yap"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Churn Prediction Results */}
+            {churnResult && (
+              <Card className="animate-fade-up">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="w-5 h-5" />
+                    <span>Churn Tahmin Sonuçları</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-lg border">
+                      <p className="text-sm text-muted-foreground">Churn Olasılığı</p>
+                      <p className="text-2xl font-bold text-red-600">
+                        {(churnResult.churn_probability * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 rounded-lg border">
+                      <p className="text-sm text-muted-foreground">Tahmin</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {churnResult.churn_prediction ? "CHURN" : "NO CHURN"}
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 rounded-lg border">
+                      <p className="text-sm text-muted-foreground">Kullanılan Model</p>
+                      <p className="text-lg font-semibold text-green-600">
+                        {churnResult.model_used}
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 rounded-lg border">
+                      <p className="text-sm text-muted-foreground">Threshold</p>
+                      <p className="text-lg font-semibold text-orange-600">
+                        {(churnResult.threshold_used * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Risk Results Sidebar */}
