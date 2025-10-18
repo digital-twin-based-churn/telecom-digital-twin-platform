@@ -328,7 +328,7 @@ const Chatbot = () => {
           </div>
         </div>
 
-        {/* Navigation Menu */}
+        {/* Navigation Menu - Simplified */}
         <div className="px-4 py-3 border-b border-blue-200/60 dark:border-gray-700/60">
           <div className="space-y-1">
             <Link to="/">
@@ -343,56 +343,20 @@ const Chatbot = () => {
                 Dashboard
               </Button>
             </Link>
-            <Link to="/statistics">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg h-10 font-medium">
-                <PieChart className="w-4 h-4 mr-3" />
-                Analitik
-              </Button>
-            </Link>
             <Link to="/risk-analysis">
               <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-cyan-600 hover:bg-cyan-50/80 dark:text-gray-300 dark:hover:text-cyan-400 dark:hover:bg-cyan-900/20 rounded-lg h-10 font-medium">
                 <Target className="w-4 h-4 mr-3" />
-                Risk
-              </Button>
-            </Link>
-            <Link to="/segment-explorer">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-indigo-600 hover:bg-indigo-50/80 dark:text-gray-300 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg h-10 font-medium">
-                <Users className="w-4 h-4 mr-3" />
-                Segmentler
-              </Button>
-            </Link>
-            <Link to="/what-if">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-pink-600 hover:bg-pink-50/80 dark:text-gray-300 dark:hover:text-pink-400 dark:hover:bg-pink-900/20 rounded-lg h-10 font-medium">
-                <Calculator className="w-4 h-4 mr-3" />
-                What-If
-              </Button>
-            </Link>
-            <Link to="/customer-360">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-orange-600 hover:bg-orange-50/80 dark:text-gray-300 dark:hover:text-orange-400 dark:hover:bg-orange-900/20 rounded-lg h-10 font-medium">
-                <User className="w-4 h-4 mr-3" />
-                Müşteri 360
-              </Button>
-            </Link>
-            <Link to="/campaign-tracker">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-amber-600 hover:bg-amber-50/80 dark:text-gray-300 dark:hover:text-amber-400 dark:hover:bg-amber-900/20 rounded-lg h-10 font-medium">
-                <Megaphone className="w-4 h-4 mr-3" />
-                Kampanyalar
+                Risk Analizi
               </Button>
             </Link>
             <Button variant="ghost" size="sm" className="w-full justify-start text-blue-600 bg-blue-50/80 dark:text-blue-400 dark:bg-blue-900/20 rounded-lg h-10 font-semibold border border-blue-200/50 dark:border-blue-800/50">
               <MessageSquare className="w-4 h-4 mr-3" />
               AI Asistan
             </Button>
-            <Link to="/simulation">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-gray-600 hover:text-purple-600 hover:bg-purple-50/80 dark:text-gray-300 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 rounded-lg h-10 font-medium">
-                <Play className="w-4 h-4 mr-3" />
-                Simülasyon
-              </Button>
-            </Link>
           </div>
         </div>
 
-        {/* Conversations */}
+        {/* Conversations - Enhanced */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
@@ -408,92 +372,110 @@ const Chatbot = () => {
               </Button>
             </div>
             
-            <div className="space-y-1">
-              {conversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  className={`group p-4 rounded-xl cursor-pointer transition-all duration-300 ${
-                    conv.active 
-                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' 
-                      : 'hover:bg-gray-50/80 dark:hover:bg-gray-700/80 hover:shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold truncate ${
-                        conv.active 
-                          ? 'text-blue-900 dark:text-blue-100' 
-                          : 'text-gray-900 dark:text-white'
-                      }`}>
-                        {conv.title}
-                      </p>
-                      <p className={`text-xs mt-1 font-medium ${
-                        conv.active 
-                          ? 'text-blue-600 dark:text-blue-300' 
-                          : 'text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {conv.time}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={(e) => handleDeleteConversation(conv.id, e)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all"
-                        title="Sohbeti sil"
-                      >
-                        <Trash2 className="w-3.5 h-3.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400" />
-                      </button>
-                      {conv.active && (
-                        <ChevronRight className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                      )}
+            {/* Active Conversations */}
+            {conversations.length > 0 && (
+              <div className="space-y-2 mb-6">
+                {conversations.map((conv) => (
+                  <div
+                    key={conv.id}
+                    className={`group p-4 rounded-xl cursor-pointer transition-all duration-300 ${
+                      conv.active 
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' 
+                        : 'hover:bg-gray-50/80 dark:hover:bg-gray-700/80 hover:shadow-sm'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold truncate ${
+                          conv.active 
+                            ? 'text-blue-900 dark:text-blue-100' 
+                            : 'text-gray-900 dark:text-white'
+                        }`}>
+                          {conv.title}
+                        </p>
+                        <p className={`text-xs mt-1 font-medium ${
+                          conv.active 
+                            ? 'text-blue-600 dark:text-blue-300' 
+                            : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          {conv.time}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => handleDeleteConversation(conv.id, e)}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all"
+                          title="Sohbeti sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400" />
+                        </button>
+                        {conv.active && (
+                          <ChevronRight className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                        )}
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
+
+            {/* Recent Conversations */}
+            {recentConversations.length > 0 && (
+              <>
+                <Separator className="my-4" />
+                <div className="mb-3">
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Son Sohbetler</h3>
                 </div>
-              ))}
-            </div>
-
-            <Separator className="my-4" />
-
-            <div className="mb-3">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Son 7 Gün</h3>
-            </div>
-            
-            <div className="space-y-1">
-              {recentConversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  className="group p-3 rounded-lg cursor-pointer hover:bg-gray-50/80 dark:hover:bg-gray-700/80 transition-all duration-200 hover:shadow-sm"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {conv.title}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {conv.time}
-                      </p>
-                    </div>
-                    <button
-                      onClick={(e) => handleDeleteConversation(conv.id, e)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all"
-                      title="Sohbeti sil"
+                
+                <div className="space-y-2">
+                  {recentConversations.map((conv) => (
+                    <div
+                      key={conv.id}
+                      className="group p-3 rounded-lg cursor-pointer hover:bg-gray-50/80 dark:hover:bg-gray-700/80 transition-all duration-200 hover:shadow-sm"
                     >
-                      <Trash2 className="w-3.5 h-3.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400" />
-                    </button>
-                  </div>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {conv.title}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {conv.time}
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeleteConversation(conv.id, e)}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all"
+                          title="Sohbeti sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
+
+            {/* Empty State */}
+            {conversations.length === 0 && recentConversations.length === 0 && (
+              <div className="text-center py-8">
+                <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Henüz sohbet geçmişi yok</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Yeni bir sohbet başlatın</p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Footer */}
         <div className="p-4 border-t border-blue-200/60 dark:border-gray-700/60">
           <div className="flex items-center space-x-3 mb-3">
-            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg">
-              <Settings className="w-4 h-4 mr-2" />
-              Ayarlar
-            </Button>
+            <Link to="/settings">
+              <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg">
+                <Settings className="w-4 h-4 mr-2" />
+                Ayarlar
+              </Button>
+            </Link>
           </div>
           
           <div className="flex items-center space-x-3">
