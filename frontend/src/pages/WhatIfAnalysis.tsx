@@ -35,33 +35,40 @@ import {
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
+import { apiService } from "@/services/api"
 
 const WhatIfAnalysis = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   
-  // Churn prediction inputs
-  const [customerData, setCustomerData] = useState({
+  // Scenario inputs
+  const [campaignType, setCampaignType] = useState("discount")
+  const [targetSegment, setTargetSegment] = useState("high-risk")
+  const [budget, setBudget] = useState([50000])
+  const [discountPercent, setDiscountPercent] = useState([20])
+  const [targetCustomers, setTargetCustomers] = useState([1000])
+  
+  // Churn prediction form
+  const [churnForm, setChurnForm] = useState({
     id: "",
-    age: 35,
-    tenure: 24,
+    age: 30,
+    tenure: 12,
     service_type: "Postpaid",
-    avg_call_duration: 120,
-    data_usage: 2.5,
-    roaming_usage: 0.1,
-    monthly_charge: 45,
+    avg_call_duration: 100,
+    data_usage: 5,
+    roaming_usage: 0,
+    monthly_charge: 50,
     overdue_payments: 0,
     auto_payment: true,
     avg_top_up_count: 0,
-    call_drops: 2,
-    customer_support_calls: 1,
-    satisfaction_score: 4.2,
-    apps: ["WhatsApp", "Instagram"]
+    call_drops: 0,
+    customer_support_calls: 0,
+    satisfaction_score: 4,
+    apps: ["WhatsApp"]
   })
   
-  // Prediction results
-  const [predictionResult, setPredictionResult] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [churnResult, setChurnResult] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
   
   // Results
   const [results, setResults] = useState<any>(null)
@@ -71,29 +78,23 @@ const WhatIfAnalysis = () => {
     navigate("/login")
   }
 
-  const predictChurn = async () => {
-    setLoading(true)
+  const handleChurnPrediction = async () => {
+    setIsLoading(true)
     try {
-      const response = await fetch('http://localhost:8000/score', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(customerData)
-      })
-      
-      if (!response.ok) {
-        throw new Error('Churn tahmini başarısız')
-      }
-      
-      const result = await response.json()
-      setPredictionResult(result)
+      const result = await apiService.predictChurn(churnForm)
+      setChurnResult(result)
     } catch (error) {
-      console.error('Churn tahmini hatası:', error)
-      alert('Churn tahmini yapılırken hata oluştu')
+      console.error('Churn prediction error:', error)
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
+  }
+
+  const handleFormChange = (field: string, value: any) => {
+    setChurnForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   const runScenario = () => {
@@ -197,38 +198,57 @@ const WhatIfAnalysis = () => {
 
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Risk Analizi - Churn Tahmini</h1>
+          <h1 className="text-3xl font-bold mb-2">What-If Senaryo Analizi</h1>
           <p className="text-muted-foreground">
-            Müşteri verilerini girerek churn riskini tahmin et ve analiz et
+            Kampanya senaryolarını test et, ROI hesapla ve etkisini önceden gör
           </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Card>
+            {/* Churn Prediction Form */}
+            <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Target className="w-5 h-5" />
-                  <span>Müşteri Bilgileri</span>
+                  <span>Churn Tahmini</span>
                 </CardTitle>
+                <CardDescription>
+                  Müşteri bilgilerini girerek churn riskini tahmin edin
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label>Müşteri ID</Label>
                     <Input 
-                      value={customerData.id}
-                      onChange={(e) => setCustomerData({...customerData, id: e.target.value})}
-                      placeholder="Müşteri ID girin"
+                      value={churnForm.id}
+                      onChange={(e) => handleFormChange('id', e.target.value)}
+                      placeholder="Müşteri ID"
                     />
                   </div>
-
+                  
+                  <div>
+                    <Label>Yaş</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.age}
+                      onChange={(e) => handleFormChange('age', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Müşteri Süresi (Ay)</Label>
+                    <Input 
+                      type="number"
+                      value={churnForm.tenure}
+                      onChange={(e) => handleFormChange('tenure', parseInt(e.target.value))}
+                    />
+                  </div>
+                  
                   <div>
                     <Label>Servis Türü</Label>
-                    <Select 
-                      value={customerData.service_type} 
-                      onValueChange={(value) => setCustomerData({...customerData, service_type: value})}
-                    >
+                    <Select value={churnForm.service_type} onValueChange={(value) => handleFormChange('service_type', value)}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Postpaid">Postpaid</SelectItem>
@@ -237,80 +257,55 @@ const WhatIfAnalysis = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div>
-                    <Label>Yaş</Label>
-                    <Input 
-                      type="number"
-                      value={customerData.age}
-                      onChange={(e) => setCustomerData({...customerData, age: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Müşteri Süresi (Ay)</Label>
-                    <Input 
-                      type="number"
-                      value={customerData.tenure}
-                      onChange={(e) => setCustomerData({...customerData, tenure: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-
+                  
                   <div>
                     <Label>Ortalama Arama Süresi (Dakika)</Label>
                     <Input 
                       type="number"
-                      step="0.1"
-                      value={customerData.avg_call_duration}
-                      onChange={(e) => setCustomerData({...customerData, avg_call_duration: parseFloat(e.target.value) || 0})}
+                      value={churnForm.avg_call_duration}
+                      onChange={(e) => handleFormChange('avg_call_duration', parseFloat(e.target.value))}
                     />
                   </div>
-
+                  
                   <div>
                     <Label>Veri Kullanımı (GB)</Label>
                     <Input 
                       type="number"
-                      step="0.1"
-                      value={customerData.data_usage}
-                      onChange={(e) => setCustomerData({...customerData, data_usage: parseFloat(e.target.value) || 0})}
+                      value={churnForm.data_usage}
+                      onChange={(e) => handleFormChange('data_usage', parseFloat(e.target.value))}
                     />
                   </div>
-
+                  
                   <div>
                     <Label>Roaming Kullanımı (GB)</Label>
                     <Input 
                       type="number"
-                      step="0.1"
-                      value={customerData.roaming_usage}
-                      onChange={(e) => setCustomerData({...customerData, roaming_usage: parseFloat(e.target.value) || 0})}
+                      value={churnForm.roaming_usage}
+                      onChange={(e) => handleFormChange('roaming_usage', parseFloat(e.target.value))}
                     />
                   </div>
-
+                  
                   <div>
                     <Label>Aylık Ücret (TL)</Label>
                     <Input 
                       type="number"
-                      step="0.1"
-                      value={customerData.monthly_charge}
-                      onChange={(e) => setCustomerData({...customerData, monthly_charge: parseFloat(e.target.value) || 0})}
+                      value={churnForm.monthly_charge}
+                      onChange={(e) => handleFormChange('monthly_charge', parseFloat(e.target.value))}
                     />
                   </div>
-
+                  
                   <div>
                     <Label>Geciken Ödemeler</Label>
                     <Input 
                       type="number"
-                      value={customerData.overdue_payments}
-                      onChange={(e) => setCustomerData({...customerData, overdue_payments: parseInt(e.target.value) || 0})}
+                      value={churnForm.overdue_payments}
+                      onChange={(e) => handleFormChange('overdue_payments', parseInt(e.target.value))}
                     />
                   </div>
-
+                  
                   <div>
                     <Label>Otomatik Ödeme</Label>
-                    <Select 
-                      value={customerData.auto_payment ? "true" : "false"} 
-                      onValueChange={(value) => setCustomerData({...customerData, auto_payment: value === "true"})}
-                    >
+                    <Select value={churnForm.auto_payment.toString()} onValueChange={(value) => handleFormChange('auto_payment', value === 'true')}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="true">Evet</SelectItem>
@@ -318,74 +313,168 @@ const WhatIfAnalysis = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
+                  
                   <div>
                     <Label>Ortalama Top-up Sayısı</Label>
                     <Input 
                       type="number"
-                      value={customerData.avg_top_up_count}
-                      onChange={(e) => setCustomerData({...customerData, avg_top_up_count: parseInt(e.target.value) || 0})}
+                      value={churnForm.avg_top_up_count}
+                      onChange={(e) => handleFormChange('avg_top_up_count', parseInt(e.target.value))}
                     />
                   </div>
-
+                  
                   <div>
                     <Label>Arama Düşmeleri</Label>
                     <Input 
                       type="number"
-                      value={customerData.call_drops}
-                      onChange={(e) => setCustomerData({...customerData, call_drops: parseInt(e.target.value) || 0})}
+                      value={churnForm.call_drops}
+                      onChange={(e) => handleFormChange('call_drops', parseInt(e.target.value))}
                     />
                   </div>
-
+                  
                   <div>
                     <Label>Müşteri Destek Çağrıları</Label>
                     <Input 
                       type="number"
-                      value={customerData.customer_support_calls}
-                      onChange={(e) => setCustomerData({...customerData, customer_support_calls: parseInt(e.target.value) || 0})}
+                      value={churnForm.customer_support_calls}
+                      onChange={(e) => handleFormChange('customer_support_calls', parseInt(e.target.value))}
                     />
                   </div>
-
+                  
                   <div>
                     <Label>Memnuniyet Skoru (1-5)</Label>
                     <Input 
                       type="number"
-                      step="0.1"
                       min="1"
                       max="5"
-                      value={customerData.satisfaction_score}
-                      onChange={(e) => setCustomerData({...customerData, satisfaction_score: parseFloat(e.target.value) || 0})}
+                      value={churnForm.satisfaction_score}
+                      onChange={(e) => handleFormChange('satisfaction_score', parseFloat(e.target.value))}
                     />
                   </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={handleChurnPrediction}
+                    disabled={isLoading}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500"
+                  >
+                    {isLoading ? "Tahmin Ediliyor..." : "Churn Tahmini Yap"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-                  <div className="md:col-span-2">
-                    <Label>Uygulamalar (Virgülle ayırın)</Label>
-                    <Input 
-                      value={customerData.apps.join(", ")}
-                      onChange={(e) => setCustomerData({...customerData, apps: e.target.value.split(",").map(app => app.trim()).filter(app => app)})}
-                      placeholder="WhatsApp, Instagram, Netflix"
-                    />
+            {/* Churn Prediction Results */}
+            {churnResult && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="w-5 h-5" />
+                    <span>Churn Tahmin Sonuçları</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-lg border">
+                      <p className="text-sm text-muted-foreground">Churn Olasılığı</p>
+                      <p className="text-2xl font-bold text-red-600">
+                        {(churnResult.churn_probability * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 rounded-lg border">
+                      <p className="text-sm text-muted-foreground">Tahmin</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {churnResult.churn_prediction ? "CHURN" : "NO CHURN"}
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 rounded-lg border">
+                      <p className="text-sm text-muted-foreground">Kullanılan Model</p>
+                      <p className="text-lg font-semibold text-green-600">
+                        {churnResult.model_used}
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 rounded-lg border">
+                      <p className="text-sm text-muted-foreground">Threshold</p>
+                      <p className="text-lg font-semibold text-orange-600">
+                        {(churnResult.threshold_used * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Sparkles className="w-5 h-5" />
+                  <span>Senaryo Parametreleri</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label>Kampanya Tipi</Label>
+                    <Select value={campaignType} onValueChange={setCampaignType}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="discount">İndirim Kampanyası</SelectItem>
+                        <SelectItem value="upgrade">Hizmet Yükseltme</SelectItem>
+                        <SelectItem value="retention">Elde Tutma Araması</SelectItem>
+                        <SelectItem value="email">E-posta Kampanyası</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
+                  <div>
+                    <Label>Hedef Segment</Label>
+                    <Select value={targetSegment} onValueChange={setTargetSegment}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high-risk">Yüksek Risk Müşteriler</SelectItem>
+                        <SelectItem value="medium-risk">Orta Risk Müşteriler</SelectItem>
+                        <SelectItem value="low-risk">Düşük Risk Müşteriler</SelectItem>
+                        <SelectItem value="all">Tüm Müşteriler</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <Label>Kampanya Bütçesi</Label>
+                      <Badge variant="outline">{budget[0].toLocaleString()} TL</Badge>
+                    </div>
+                    <Slider value={budget} onValueChange={setBudget} min={10000} max={500000} step={5000} />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <Label>İndirim Oranı (%)</Label>
+                      <Badge variant="outline">%{discountPercent[0]}</Badge>
+                    </div>
+                    <Slider value={discountPercent} onValueChange={setDiscountPercent} min={5} max={50} step={5} />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <Label>Hedef Müşteri Sayısı</Label>
+                      <Badge variant="outline">{targetCustomers[0].toLocaleString()}</Badge>
+                    </div>
+                    <Slider value={targetCustomers} onValueChange={setTargetCustomers} min={100} max={10000} step={100} />
+                  </div>
                 </div>
 
                 <Button 
-                  onClick={predictChurn}
-                  disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                  onClick={runScenario}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
                   size="lg"
                 >
-                  {loading ? (
-                    <>
-                      <div className="w-5 h-5 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      Tahmin Ediliyor...
-                    </>
-                  ) : (
-                    <>
-                      <Target className="w-5 h-5 mr-2" />
-                      Churn Tahmini Yap
-                    </>
-                  )}
+                  <Calculator className="w-5 h-5 mr-2" />
+                  Senaryoyu Hesapla
                 </Button>
               </CardContent>
             </Card>
@@ -393,65 +482,61 @@ const WhatIfAnalysis = () => {
 
           {/* Results */}
           <div className="space-y-6">
-            {predictionResult && (
+            {results && (
               <>
                 <Card className="animate-fade-in">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
-                      <Target className="w-5 h-5 text-blue-600" />
-                      <span>Churn Tahmini Sonuçları</span>
+                      <TrendingUp className="w-5 h-5 text-success" />
+                      <span>Tahmin Edilen Sonuçlar</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-                      <p className="text-sm text-muted-foreground">Churn Olasılığı</p>
-                      <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                        %{(predictionResult.churn_probability * 100).toFixed(1)}
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                      <p className="text-sm text-muted-foreground">ROI</p>
+                      <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                        %{results.roi.toFixed(0)}
                       </p>
                     </div>
 
                     <div className="p-4 rounded-lg border">
-                      <p className="text-sm text-muted-foreground">Kullanılan Model</p>
-                      <p className="text-lg font-bold text-purple-600">{predictionResult.model_used}</p>
+                      <p className="text-sm text-muted-foreground">Kampanya Maliyeti</p>
+                      <p className="text-xl font-bold text-red-600">{results.totalCost.toLocaleString()} TL</p>
                     </div>
 
                     <div className="p-4 rounded-lg border">
-                      <p className="text-sm text-muted-foreground">Servis Türü</p>
-                      <p className="text-lg font-bold text-green-600">{predictionResult.service_type}</p>
+                      <p className="text-sm text-muted-foreground">Elde Tutulacak Müşteri</p>
+                      <p className="text-xl font-bold text-blue-600">{results.retainedCustomers} kişi</p>
                     </div>
 
                     <div className="p-4 rounded-lg border">
-                      <p className="text-sm text-muted-foreground">Threshold</p>
-                      <p className="text-lg font-bold text-orange-600">%{(predictionResult.threshold_used * 100).toFixed(1)}</p>
+                      <p className="text-sm text-muted-foreground">Korunacak Gelir (Yıllık)</p>
+                      <p className="text-xl font-bold text-green-600">{results.revenueProtected.toLocaleString()} TL</p>
                     </div>
 
-                    <div className="p-4 rounded-lg border">
-                      <p className="text-sm text-muted-foreground">Kullanılan Özellikler</p>
-                      <p className="text-sm text-gray-600">{predictionResult.features_used?.length || 0} özellik</p>
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                      <p className="text-sm text-muted-foreground">Net Kazanç</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {results.netBenefit.toLocaleString()} TL
+                      </p>
                     </div>
 
                     <Badge className={`w-full justify-center text-lg py-3 ${
-                      predictionResult.churn_prediction ? 'bg-red-500' : 'bg-green-500'
+                      results.roi > 100 ? 'bg-green-500' : results.roi > 50 ? 'bg-yellow-500' : 'bg-red-500'
                     } text-white`}>
-                      {predictionResult.churn_prediction ? '⚠️ CHURN RİSKİ' : '✅ GÜVENLİ'}
+                      {results.roi > 100 ? '✓ Çok Karlı!' : results.roi > 50 ? '⚠ Kabul Edilebilir' : '✗ Karlı Değil'}
                     </Badge>
-
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20">
-                      <p className="text-sm text-muted-foreground">Tahmin Zamanı</p>
-                      <p className="text-sm text-gray-600">{predictionResult.timestamp}</p>
-                    </div>
                   </CardContent>
                 </Card>
               </>
             )}
 
-            {!predictionResult && (
+            {!results && (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Target className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Churn Tahmini</h3>
+                  <Calculator className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">
-                    Müşteri bilgilerini girin ve "Churn Tahmini Yap" butonuna tıklayın
+                    Senaryo parametrelerini ayarlayın ve "Senaryoyu Hesapla" butonuna tıklayın
                   </p>
                 </CardContent>
               </Card>

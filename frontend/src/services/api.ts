@@ -288,6 +288,17 @@ class ApiService {
       method: 'GET',
     });
   }
+
+  // GYK ML Service churn prediction
+  async predictChurn(data: any): Promise<any> {
+    return await fetch('http://localhost:8000/score', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }).then(res => res.json());
+  }
 }
 
 export const apiService = new ApiService();
