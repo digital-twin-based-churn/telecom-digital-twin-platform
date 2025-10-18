@@ -17,6 +17,7 @@ import Customer360 from "./pages/Customer360";
 import CampaignTracker from "./pages/CampaignTracker";
 import Chatbot from "./pages/Chatbot";
 import Simulation from "./pages/Simulation";
+import Settings from "./pages/Settings";
 import ApiTest from "./pages/ApiTest";
 import NotFound from "./pages/NotFound";
 
@@ -102,6 +103,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Simulation />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/settings" 
+                element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 } 
               />
