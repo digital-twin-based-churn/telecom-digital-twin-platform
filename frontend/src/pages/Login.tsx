@@ -329,7 +329,7 @@ const Login = () => {
             
             <div className="mt-8 text-center animate-smooth-fade-in" style={{ animationDelay: '0.8s' }}>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                © 2024 Dijital İkiz Platformu. Tüm hakları saklıdır.
+                © 2025 Dijital İkiz Platformu. Tüm hakları saklıdır.
               </p>
             </div>
           </div>

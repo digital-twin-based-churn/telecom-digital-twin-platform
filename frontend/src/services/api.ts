@@ -236,11 +236,6 @@ class ApiService {
     });
   }
 
-  async getChurnByService(): Promise<any> {
-    return await this.request('/api/analytics/churn-by-service', {
-      method: 'GET',
-    });
-  }
 
   async getCustomerSupportImpact(): Promise<any> {
     return await this.request('/api/analytics/customer-support-impact', {

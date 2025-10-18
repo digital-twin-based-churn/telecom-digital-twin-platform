@@ -511,6 +511,173 @@ class AnalyticsService:
                 "revenue_protected": 0,
                 "model_metrics": {}
             }
+    
+    def get_customer_360_data(self, customer_id: str) -> Dict[str, Any]:
+        """
+        Get comprehensive customer 360 view with real data from GYK capstone.1.jsonl
+        """
+        try:
+            import json
+            import os
+            from datetime import datetime
+            
+            # Path to capstone.1.jsonl file
+            capstone_file = "/Users/sultan/Desktop/proje/GYK-capstone-project/data/capstone.1.jsonl"
+            
+            if not os.path.exists(capstone_file):
+                raise FileNotFoundError(f"Capstone file not found: {capstone_file}")
+            
+            # Search for customer in capstone.1.jsonl
+            customer_data = None
+            with open(capstone_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    try:
+                        data = json.loads(line.strip())
+                        if data.get('id') == customer_id:
+                            customer_data = data
+                            break
+                    except json.JSONDecodeError:
+                        continue
+            
+            if not customer_data:
+                # If customer not found, return error
+                return {
+                    "error": f"Customer with ID '{customer_id}' not found in database",
+                    "customer_profile": None,
+                    "risk_analysis": None,
+                    "recommendations": []
+                }
+            
+            # Transform GYK data to customer profile format
+            customer_profile = {
+                "id": customer_data.get('id', customer_id),
+                "age": customer_data.get('age', 0),
+                "service_type": customer_data.get('service_type', 'Unknown'),
+                "monthly_charge": round(customer_data.get('monthly_charge', 0), 2),
+                "tenure": customer_data.get('tenure', 0),
+                "data_usage": round(customer_data.get('data_usage', 0), 2),
+                "support_calls": customer_data.get('customer_support_calls', 0),
+                "auto_payment": customer_data.get('auto_payment', False),
+                "satisfaction_score": round(customer_data.get('satisfaction_score', 0), 1),
+                "apps_count": len(customer_data.get('apps', [])),
+                "roaming_usage": round(customer_data.get('roaming_usage', 0), 2),
+                "call_drops": customer_data.get('call_drops', 0),
+                "overdue_payments": customer_data.get('overdue_payments', 0),
+                "avg_call_duration": round(customer_data.get('avg_call_duration', 0), 2),
+                "avg_top_up_count": customer_data.get('avg_top_up_count', 0),
+                "apps": customer_data.get('apps', []),
+                "churn": customer_data.get('churn', False)
+            }
+            
+            # Calculate risk score based on GYK model features
+            risk_factors = []
+            risk_score = 0
+            
+            # Age factor
+            if customer_profile["age"] > 50:
+                risk_factors.append("Yaş faktörü")
+                risk_score += 15
+            
+            # Tenure factor
+            if customer_profile["tenure"] < 6:
+                risk_factors.append("Yeni müşteri")
+                risk_score += 20
+            elif customer_profile["tenure"] > 36:
+                risk_factors.append("Uzun süreli müşteri")
+                risk_score -= 10
+            
+            # Support calls factor
+            if customer_profile["support_calls"] > 5:
+                risk_factors.append("Yüksek destek araması")
+                risk_score += 25
+            
+            # Satisfaction factor
+            if customer_profile["satisfaction_score"] < 5:
+                risk_factors.append("Düşük memnuniyet")
+                risk_score += 30
+            
+            # Auto payment factor
+            if not customer_profile["auto_payment"]:
+                risk_factors.append("Manuel ödeme")
+                risk_score += 10
+            
+            # Overdue payments factor
+            if customer_profile["overdue_payments"] > 0:
+                risk_factors.append("Geciken ödemeler")
+                risk_score += 20
+            
+            # Data usage factor
+            if customer_profile["data_usage"] < 5:
+                risk_factors.append("Düşük veri kullanımı")
+                risk_score += 15
+            
+            # Call drops factor
+            if customer_profile["call_drops"] > 10:
+                risk_factors.append("Yüksek çağrı düşme oranı")
+                risk_score += 15
+            
+            # Roaming usage factor
+            if customer_profile["roaming_usage"] > 50:
+                risk_factors.append("Yüksek roaming kullanımı")
+                risk_score += 10
+            
+            # Ensure risk score is between 0-100
+            risk_score = max(0, min(100, risk_score))
+            
+            # Determine risk level
+            if risk_score > 70:
+                risk_level = "Yüksek"
+            elif risk_score > 40:
+                risk_level = "Orta"
+            else:
+                risk_level = "Düşük"
+            
+            # Calculate predicted churn probability
+            churn_probability = risk_score / 100
+            
+            # Generate recommendations based on risk factors
+            recommendations = []
+            if risk_score > 70:
+                recommendations.extend([
+                    "Acil müdahale gerekli",
+                    "Kişisel iletişim kurun",
+                    "Özel kampanya teklifi"
+                ])
+            elif risk_score > 40:
+                recommendations.extend([
+                    "Sadakat programına dahil et",
+                    "Premium hizmet öner",
+                    "Düzenli takip yap"
+                ])
+            else:
+                recommendations.extend([
+                    "Mevcut hizmeti sürdür",
+                    "Ek hizmetler öner",
+                    "Referans programına dahil et"
+                ])
+            
+            return {
+                "customer_profile": customer_profile,
+                "risk_analysis": {
+                    "risk_score": risk_score,
+                    "risk_level": risk_level,
+                    "risk_factors": risk_factors,
+                    "churn_probability": round(churn_probability * 100, 1),
+                    "predicted_churn": f"{round(churn_probability * 100, 1)}%"
+                },
+                "recommendations": recommendations,
+                "last_updated": datetime.now().isoformat(),
+                "data_source": "GYK Capstone Project - capstone.1.jsonl"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating customer 360 data: {e}")
+            return {
+                "error": f"Failed to generate customer data: {str(e)}",
+                "customer_profile": None,
+                "risk_analysis": None,
+                "recommendations": []
+            }
 
 # Create singleton instance
 analytics_service = AnalyticsService()

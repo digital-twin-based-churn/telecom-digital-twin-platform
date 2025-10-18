@@ -2,6 +2,7 @@
 Analytics endpoints for dashboard data using GYK-capstone-project
 """
 from fastapi import APIRouter, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, List, Any
 import logging
 import requests
@@ -156,3 +157,158 @@ async def predict_churn(data: Dict[str, Any]) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"ML Service error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+@router.get("/customer-360/{customer_id}")
+async def get_customer_360(customer_id: str) -> Dict[str, Any]:
+    """
+    Get comprehensive customer 360 view with real data
+    """
+    try:
+        logger.info(f"Getting customer 360 data for ID: {customer_id}")
+        result = analytics_service.get_customer_360_data(customer_id)
+        logger.info(f"Customer 360 data retrieved successfully")
+        return result
+    except Exception as e:
+        logger.error(f"Error getting customer 360 data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/segment-analysis")
+async def get_segment_analysis() -> Dict[str, Any]:
+    """
+    Get detailed segment analysis from GYK data
+    """
+    try:
+        logger.info("Getting segment analysis data")
+        result = analytics_service.get_segment_analysis()
+        logger.info(f"Segment analysis data retrieved successfully: {len(result.get('segments', []))} segments")
+        return result
+    except Exception as e:
+        logger.error(f"Error getting segment analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/random-customer-ids")
+async def get_random_customer_ids() -> Dict[str, Any]:
+    """
+    Get random customer IDs from the database for testing
+    """
+    try:
+        from database import get_db
+        from models import Customer
+        from sqlalchemy.orm import Session
+        import random
+        
+        db = next(get_db())
+        
+        # Veritabanından müşteri ID'lerini çek
+        customers = db.query(Customer.customer_id).limit(50).all()
+        
+        if not customers:
+            # Veritabanı boşsa fallback ID'ler döndür
+            return {
+                "customer_ids": [
+                    "1f3f1168-c2b0-41ad-a2f5-19c01f4c80fd",
+                    "postpaid_sadik_musteri",
+                    "postpaid_problemli_musteri", 
+                    "prepaid_sadik_musteri",
+                    "prepaid_problemli_musteri",
+                    "broadband_sadik_musteri",
+                    "broadband_problemli_musteri"
+                ]
+            }
+        
+        # Customer ID'leri çıkar
+        customer_ids = [customer.customer_id for customer in customers]
+        
+        # Random 10 ID seç
+        random_ids = random.sample(customer_ids, min(10, len(customer_ids)))
+        
+        db.close()
+        
+        return {
+            "customer_ids": random_ids,
+            "total_customers": len(customer_ids)
+        }
+    except Exception as e:
+        logger.error(f"Error getting random customer IDs: {e}")
+        # Fallback ID'ler
+        return {
+            "customer_ids": [
+                "1f3f1168-c2b0-41ad-a2f5-19c01f4c80fd",
+                "postpaid_sadik_musteri",
+                "postpaid_problemli_musteri", 
+                "prepaid_sadik_musteri",
+                "prepaid_problemli_musteri",
+                "broadband_sadik_musteri",
+                "broadband_problemli_musteri"
+            ]
+        }
+
+@router.get("/test-scenarios")
+async def get_test_scenarios() -> Dict[str, Any]:
+    """
+    Get test scenarios data for random customer ID selection
+    """
+    try:
+        import json
+        import os
+        
+        # Test scenarios dosyasının yolu
+        scenarios_path = os.path.join(os.path.dirname(__file__), "../../GYK-capstone-project/data/artifacts/churn_test_scenarios.json")
+        
+        if not os.path.exists(scenarios_path):
+            # Fallback scenarios
+            return {
+                "test_scenarios": {
+                    "Postpaid": {
+                        "low_risk": {
+                            "test_data": {
+                                "id": "postpaid_sadik_musteri",
+                                "service_type": "Postpaid"
+                            }
+                        },
+                        "high_risk": {
+                            "test_data": {
+                                "id": "postpaid_problemli_musteri",
+                                "service_type": "Postpaid"
+                            }
+                        }
+                    },
+                    "Prepaid": {
+                        "low_risk": {
+                            "test_data": {
+                                "id": "prepaid_sadik_musteri",
+                                "service_type": "Prepaid"
+                            }
+                        },
+                        "high_risk": {
+                            "test_data": {
+                                "id": "prepaid_problemli_musteri",
+                                "service_type": "Prepaid"
+                            }
+                        }
+                    },
+                    "Broadband": {
+                        "low_risk": {
+                            "test_data": {
+                                "id": "broadband_sadik_musteri",
+                                "service_type": "Broadband"
+                            }
+                        },
+                        "high_risk": {
+                            "test_data": {
+                                "id": "broadband_problemli_musteri",
+                                "service_type": "Broadband"
+                            }
+                        }
+                    }
+                }
+            }
+        
+        with open(scenarios_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return data
+    except Exception as e:
+        logger.error(f"Error getting test scenarios: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

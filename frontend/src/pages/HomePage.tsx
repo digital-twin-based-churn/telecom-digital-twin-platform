@@ -641,7 +641,7 @@ const HomePage = () => {
               <span className="text-lg font-semibold text-gray-900 dark:text-white">Dijital İkiz Platformu</span>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-center md:text-right">
-              © 2024 Dijital İkiz Tabanlı Churn Önleme Sistemi. Gelişmiş AI ile desteklenmektedir.
+              © 2025 Dijital İkiz Tabanlı Churn Önleme Sistemi. Gelişmiş AI ile desteklenmektedir.
             </p>
           </div>
         </div>
