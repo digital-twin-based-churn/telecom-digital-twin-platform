@@ -35,7 +35,6 @@ import {
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
-import { apiService } from "@/services/api"
 
 const WhatIfAnalysis = () => {
   const { user, logout } = useAuth()
@@ -48,53 +47,12 @@ const WhatIfAnalysis = () => {
   const [discountPercent, setDiscountPercent] = useState([20])
   const [targetCustomers, setTargetCustomers] = useState([1000])
   
-  // Churn prediction form
-  const [churnForm, setChurnForm] = useState({
-    id: "",
-    age: 30,
-    tenure: 12,
-    service_type: "Postpaid",
-    avg_call_duration: 100,
-    data_usage: 5,
-    roaming_usage: 0,
-    monthly_charge: 50,
-    overdue_payments: 0,
-    auto_payment: true,
-    avg_top_up_count: 0,
-    call_drops: 0,
-    customer_support_calls: 0,
-    satisfaction_score: 4,
-    apps: ["WhatsApp"]
-  })
-  
-  const [churnResult, setChurnResult] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  
   // Results
   const [results, setResults] = useState<any>(null)
 
   const handleLogout = () => {
     logout()
     navigate("/login")
-  }
-
-  const handleChurnPrediction = async () => {
-    setIsLoading(true)
-    try {
-      const result = await apiService.predictChurn(churnForm)
-      setChurnResult(result)
-    } catch (error) {
-      console.error('Churn prediction error:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleFormChange = (field: string, value: any) => {
-    setChurnForm(prev => ({
-      ...prev,
-      [field]: value
-    }))
   }
 
   const runScenario = () => {
