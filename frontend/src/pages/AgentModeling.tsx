@@ -40,7 +40,9 @@ import {
   Globe,
   Shield,
   TrendingDown,
-  CreditCard
+  CreditCard,
+  Download,
+  FileSpreadsheet
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { apiService } from "@/services/api"
@@ -48,6 +50,67 @@ import { apiService } from "@/services/api"
 const AgentModeling = () => {
   const { toast } = useToast()
   const [isRunning, setIsRunning] = useState(false)
+
+  // Excel export fonksiyonu
+  const exportToExcel = () => {
+    if (!simulationResults) {
+      toast({
+        title: "Hata",
+        description: "Önce simülasyon çalıştırın",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      let csvContent = ""
+      let filename = ""
+
+      if (simulationResults.type === 'time_series' && simulationResults.simulation_steps) {
+        // Zaman serisi için
+        csvContent = "Adım,Tarih,Müşteri Sayısı,Elde Tutma %,Churn %,Yükseltme %,Müdahale\n"
+        
+        simulationResults.simulation_steps.forEach((step: any) => {
+          csvContent += `${step.step},${step.timestamp},${step.collective_metrics?.total_customers || 0},${((step.collective_metrics?.overall_retention_rate || 0) * 100).toFixed(2)},${((step.collective_metrics?.overall_churn_rate || 0) * 100).toFixed(2)},${((step.collective_metrics?.overall_upgrade_rate || 0) * 100).toFixed(2)},${step.intervention ? 'Evet' : 'Hayır'}\n`
+        })
+        
+        filename = `zaman_serisi_simulasyon_${new Date().toISOString().split('T')[0]}.csv`
+      } else {
+        // Normal simülasyon için
+        csvContent = "Müşteri ID,Servis Türü,Karar\n"
+        
+        if (simulationResults.individual_decisions) {
+          simulationResults.individual_decisions.forEach((decision: any) => {
+            csvContent += `${decision.customer_id},${decision.service_type || 'N/A'},${decision.decision || 'N/A'}\n`
+          })
+        }
+        
+        filename = `agent_simulasyon_${new Date().toISOString().split('T')[0]}.csv`
+      }
+
+      // CSV dosyasını indir
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', filename)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: "Başarılı",
+        description: `${filename} dosyası indirildi`,
+      })
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Dosya indirme hatası",
+        variant: "destructive"
+      })
+    }
+  }
   const [progress, setProgress] = useState(0)
   const [simulationResults, setSimulationResults] = useState(null)
   const [agents, setAgents] = useState([])
@@ -907,10 +970,21 @@ const AgentModeling = () => {
               {simulationResults && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <CheckCircle className="w-5 h-5 text-success" />
-                      <span>Simülasyon Sonuçları</span>
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center space-x-2">
+                        <CheckCircle className="w-5 h-5 text-success" />
+                        <span>Simülasyon Sonuçları</span>
+                      </CardTitle>
+                      <Button 
+                        onClick={exportToExcel}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2"
+                      >
+                        <FileSpreadsheet className="w-4 h-4" />
+                        <span>Excel'e İndir</span>
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {/* Zaman Serisi Sonuçları */}
