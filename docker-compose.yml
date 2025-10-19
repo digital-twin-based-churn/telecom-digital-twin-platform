@@ -46,6 +46,7 @@ services:
       SPARK_LOCAL_IP: 127.0.0.1
       SPARK_DRIVER_MEM: 2g
       SPARK_EXECUTOR_MEM: 2g
+    command: sh -c "SPARK_LOCAL_IP=127.0.0.1 python -m uvicorn app_multi_model:app --host 127.0.0.1 --port 8000"
     ports:
       - "8000:8000"
     restart: unless-stopped

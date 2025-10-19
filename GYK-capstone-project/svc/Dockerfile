@@ -5,6 +5,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     python3-venv \
+    python3-dev \
+    build-essential \
+    gcc \
+    g++ \
     ca-certificates \
     bash \
     procps \
@@ -35,5 +39,3 @@ ENV SPARK_LOCAL_IP=127.0.0.1 \
 EXPOSE 8000
 
 CMD ["python3", "app_multi_model.py"]
-
-
