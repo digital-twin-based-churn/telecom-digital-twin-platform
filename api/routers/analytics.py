@@ -8,6 +8,7 @@ import logging
 import requests
 
 from services.analytics_service import analytics_service
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +150,8 @@ async def predict_churn(data: Dict[str, Any]) -> Dict[str, Any]:
             data["id"] = f"customer_{uuid.uuid4().hex[:8]}"
         
         # Forward request to ML Service
-        ml_service_url = "http://localhost:8000/score"
+        base_url = settings.ML_SERVICE_URL.rstrip('/')
+        ml_service_url = f"{base_url}/score"
         response = requests.post(ml_service_url, json=data, timeout=30)
         response.raise_for_status()
         return response.json()

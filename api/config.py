@@ -8,6 +8,8 @@ class Settings:
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    # External services
+    ML_SERVICE_URL: str = os.getenv("ML_SERVICE_URL", "http://localhost:8000")
     
     # AI API Keys - Google Gemini (Main AI Engine)
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
