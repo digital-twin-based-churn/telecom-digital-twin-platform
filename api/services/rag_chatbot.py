@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 
 import google.generativeai as genai
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain.schema import Document
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
