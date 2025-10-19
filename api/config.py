@@ -10,6 +10,8 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     # External services
     ML_SERVICE_URL: str = os.getenv("ML_SERVICE_URL", "http://localhost:8000")
+    # Security toggles
+    DISABLE_AUTH: bool = os.getenv("DISABLE_AUTH", "true").lower() == "true"
     
     # AI API Keys - Google Gemini (Main AI Engine)
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
