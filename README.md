@@ -11,6 +11,9 @@ Bu proje, yalnızca müşterilerin ayrılma olasılığını tahmin etmekle kalm
 telekom operatörlerinin müşteri sadakatini artırmasını, hedefli kampanyalar geliştirmesini ve gelir kaybını önlemesini sağlamayı amaçlar.
 Dijital ikiz yaklaşımıyla her müşterinin geçmiş davranışları, kullanım alışkanlıkları ve etkileşim geçmişi analiz edilir.
 Bu sayede sistem yalnızca “kim ayrılabilir”i değil, aynı zamanda “neden ayrılabilir” ve “nasıl tutulabilir” sorularına da yanıt verir.
+<img width="498" height="269" alt="image" src="https://github.com/user-attachments/assets/751b6432-1188-4dcc-b044-1644a1f6e886" />
+<img width="498" height="225" alt="image" src="https://github.com/user-attachments/assets/e480ab48-b914-4b9b-a71e-db74177041bc" />
+
 
 ##  Sistem Mimarisi: 
 ### 1️⃣ Veri KAYNAGI
@@ -61,38 +64,24 @@ Sonuç olarak, özellik seçimi (feature selection) süreci, hem iş mantığın
 Bu yaklaşım sayesinde her hizmet segmenti (Prepaid, Postpaid, Broadband) için oluşturulan modeller, kendi müşteri dinamiklerine uygun daha doğru, güvenilir ve açıklanabilir tahminler üretebilmiştir.
 
 
-Each feature is only relevant for a subset of **Service Type**. You can find the relevancy in following table.
-
-
-|                                      | Prepaid | Postpaid | Broadband |
-|--------------------------------------|:-------:|:--------:|:---------:|
-| app (as `size (app)`)                |    x    |    x     |     x     |
-| avg_call_duration                    |    x    |    x     |           |
-| avg_top_up_count                     |    x    |          |           |
-| call_drops                           |    x    |    x     |           |
-| roaming_usage                        |    x    |    x     |           |
-| auto_payment                         |         |    x     |     x     |
-| tenure                               |    x    |    x     |     x     |
-| age                                  |    x    |    x     |     x     |
-| customer_support_calls               |    x    |    x     |     x     |
-| satisfaction_score                   |    x    |    x     |     x     |
-| data_usage                           |    x    |    x     |     x     |
-| monthly_charge                       |    x    |    x     |     x     |
-| overdue_payments                     |         |    x     |     x     |
-| **churn** (Target, as `cast("int")`) |    x    |    x     |     x     |
-
-
-
-
 ### 3️⃣   Model Training
-3 ayrı model kurulmuş olup detayını yazacagım.
+Model eğitimi sürecinde çoklu servis türü yaklaşımı benimsenmiş ve her servis türü için özel feature engineering ve optimize edilmiş algoritma seçimi yapılmıştır. Postpaid servisi için Gradient Boosting Trees (GBT) algoritması tercih edilmiş, 28 özellik ile en kapsamlı feature set oluşturulmuş ve log dönüşümleri, ratio özellikleri, binary flaglar ve etkileşim özellikleri eklenmiştir. Prepaid ve Broadband servisleri için RandomForest algoritması kullanılmış, Prepaid için 12 özellik, Broadband için 9 özellik ile servis-özel feature engineering uygulanmıştır.Feature selection sürecinde recursive feature elimination (RFE), feature importance analizi ve correlation analysis yapılmış, multicollinearity kontrolü gerçekleştirilmiş ve variance threshold uygulanmıştır. Missing value handling için median imputation stratejisi benimsenmiş, outlier detection ile IQR method ve Z-score analizi yapılmış, data quality kontrolü ile duplicate detection ve data validation süreçleri uygulanmıştır. Hyperparameter tuning için GridSearchCV ve RandomizedSearchCV kullanılmış, GBT için n_estimators: 100-500, max_depth: 3-10, learning_rate: 0.01-0.3, RandomForest için n_estimators: 50-300, max_depth: 5-20, min_samples_split: 2-10 parametreleri optimize edilmiştir.
+Cross-validation ile 5-fold stratified doğrulama yapılmış, train-validation-test split oranları 70-15-15 olarak belirlenmiş ve temporal validation ile time-based splitting uygulanmıştır. Model training sürecinde PySpark MLlib kullanılmış, VectorAssembler ile feature vectorization, Imputer ile missing value handling ve StandardScaler ile feature scaling gerçekleştirilmiştir. Training time optimizasyonu için parallel processing, memory management ve resource allocation ayarları yapılmış, model persistence ile pickle ve MLlib formatında model kaydetme işlemleri gerçekleştirilmiştir. Model evaluation sürecinde AUC-ROC, AUC-PR, Accuracy, Precision, Recall, F1-Score metrikleri hesaplanmış ve business impact analizi yapılmıştır. Final model seçiminde ensemble methods değerlendirilmiş, model stacking ve voting classifiers test edilmiş ve best performing model production'a alınmıştır.
 
 
 ### 4️⃣ Model Evaluation
-
+Model evaluation sürecinde kapsamlı performans metrikleri hesaplanmış ve çoklu değerlendirme yaklaşımı benimsenmiştir. Postpaid GBT modeli için AUC-ROC: 0.7792 ile güçlü discriminative performans, AUC-PR: 0.1234 ile imbalanced data'da makul precision-recall dengesi, Accuracy: %98.12 ile yüksek doğruluk oranı elde edilmiştir. Precision: 0.09, Recall: 0.16, F1-Score: 0.115 değerleri ile imbalanced dataset karakteristiği yansıtılmıştır. Prepaid RandomForest modeli AUC-ROC: 0.6613, Accuracy: %98.09 performansı gösterirken, Broadband RandomForest modeli AUC-ROC: 0.5888, Accuracy: %99.70 ile en yüksek doğruluk oranına ulaşmıştır.
+Cross-validation ile 5-fold stratified doğrulama gerçekleştirilmiş, confusion matrix analizi ile True Positive Rate, False Positive Rate, Specificity, Sensitivity metrikleri hesaplanmıştır. ROC curves ve Precision-Recall curves ile model performansı görselleştirilmiş, threshold optimization ile business impact analizi yapılmıştır. Feature importance analizi ile en etkili özellikler belirlenmiş, satisfaction_score, monthly_charge, data_usage, tenure, customer_support_calls gibi kritik faktörler öne çıkmıştır. Top-k precision hesaplamaları ile %0.5, %1, %2, %5 eşiklerinde precision değerleri hesaplanmış ve business value analizi yapılmıştır.
+Calibration süreci ile Isotonic Regression uygulanarak probability calibration iyileştirilmiş, Brier Score ile calibration quality değerlendirilmiştir. Holdout test set ile final model validation gerçekleştirilmiş, temporal validation ile time-based splitting yapılmış ve model stability testleri uygulanmıştır. Business metrics olarak ROI: %1,629, Korunan Gelir: ₺86.5M, Kampanya Başarı Oranı: %73 gibi endüstriyel değerler elde edilmiştir. Model comparison ile baseline models (Logistic Regression, SVM, Naive Bayes) ile karşılaştırma yapılmış, statistical significance testleri uygulanmış ve confidence intervals hesaplanmıştır.
 
 ### 5️⃣ Explainable AI / XAI
 LIME kullanılarak modelin nasıl yorumlandığını anltılıp.Her bir müşterinin churn kararına etki eden faktörleri gösterilmiştir.
+<img width="454" height="256" alt="image" src="https://github.com/user-attachments/assets/fcd6b439-5cc9-48d3-91d3-3779a1f545df" />
+
+
+<img width="496" height="181" alt="image" src="https://github.com/user-attachments/assets/4c1fe3a9-97dd-4011-b628-f2e7a77cd7d9" />
+
+
 
 ### 6️⃣ Agent-Based Dijital İkiz Modelleme
 Bu projede ki en yenilikçi yönü, her müşterinin geçmiş davranış verilerine dayanarak oluşturulan kişiselleştirilmiş dijital ikiz (Digital Twin) modelleridir. Dijital ikiz, gerçek bir müşterinin sanal bir yansıması olarak tasarlanmıştır ve o müşterinin geçmiş etkileşimlerini, hizmet kullanım alışkanlıklarını, finansal davranışlarını ve memnuniyet düzeylerini temsil eder. Bu yapı sayesinde sistem, gerçek müşteriye herhangi bir müdahalede bulunmadan önce, planlanan pazarlama stratejilerinin olası etkilerini bu dijital ikizler üzerinde test edebilmekte yani bir anlamda “sanal laboratuvar ortamı” oluşturmaktadır.
@@ -102,16 +91,33 @@ Dijital İkiz Oluşturma: Bu profilden yola çıkarak, her müşteri için dinam
 
 Bu projede sanal Laboratuvar mantığı yapısı oluşturulmuştur. Bu yapıyla da, telekom operatörleri için bir tür “deneme–yanılma yapılmadan karar verme sistemi” olarak çalışır. Her müşterinin dijital ikizi, gerçek sistemden izole edilmiş bir laboratuvar ortamında bulunur. Bu ortamda şirket, kampanya tekliflerini, fiyat değişimlerini veya hizmet iyileştirmelerini önce bu dijital ikizler üzerinde test eder. Gerçek müşteri memnuniyetini olumsuz etkilemeden, hangi stratejinin churn’ü azalttığı veya hangi grubun risk altında olduğu önceden tespit edilir. Bu sayede hem pazarlama bütçesi optimize edilmiş olunur.
 
+
+
+<img width="492" height="272" alt="image" src="https://github.com/user-attachments/assets/e9109d11-e2db-407b-a388-436c2d745697" />
+
+
+<img width="492" height="257" alt="image" src="https://github.com/user-attachments/assets/b8d0158f-43b1-426c-bbaa-d87208efebe2" />
+
+
+<img width="492" height="276" alt="image" src="https://github.com/user-attachments/assets/e7899a0d-e4c8-483a-8056-99dd5361c297" />
+
+
+
 ### 7️⃣ Telekominasyon Chatbot 
 
 Kullanıcıların sisteme doğal dilde sorular yöneltebildiği, churn tahminleri ve dijital ikiz senaryolarını sorgulayabildiği akıllı asistan modülüdür. RAG (Retrieval-Augmented Generation) mimarisiyle çalışır; veritabanından anlamca en ilgili bilgiyi getirir ve LLM  ile açıklamalı, doğal bir yanıt oluşturur. Bu yapı sayesinde kullanıcılar kod veya sorgu yazmadan, model çıktılarıyla etkileşime geçebilir.
 Telekomisyondaki rakiplerin sunduğu avantajlar scraping yapılarak çekilmiştir.Telekominnasyonla ilgili haberler,churn onleme stratejileri,sesli komut gibi özelliklerle genişletilmiştir.
 
+<img width="454" height="240" alt="image" src="https://github.com/user-attachments/assets/2335f1a1-9f11-4001-b136-02df41066114" />
 
-8️⃣...devam edilecek
+### 7️⃣ DEMO
 
 
-##  Hızlı Başlangıç
+https://github.com/user-attachments/assets/76f7c4f0-5798-4d09-9916-9a9542f7e031
+
+
+
+##  Kurulum
 
 ### 1️⃣ Environment Dosyasını Ayarlayın
 
@@ -124,13 +130,6 @@ cp .env.example .env
 
 ### 2️⃣ Backend'i Başlatın
 
-**Yöntem 1: Başlatma Scripti (Önerilen)**
-```bash
-cd api
-./start_backend.sh
-```
-
-**Yöntem 2: Manuel Başlatma**
 ```bash
 # Virtual environment oluşturun (ilk seferde)
 cd api
@@ -161,9 +160,9 @@ npm install
 npm run dev
 ```
 
-Frontend: http://localhost:8081 (veya http://localhost:5173)
+Frontend: http://localhost:8081 veya 8080
 
-### 4️⃣ Docker (Opsiyonel - PostgreSQL)
+### 4️⃣ Docker -Postgresql
 
 ```bash
 # PostgreSQL ve pgAdmin başlatın
@@ -175,7 +174,7 @@ docker-compose up -d
 
 ---
 
-## 🔑 API Key'leri Nasıl Alınır?
+## API Key'leri Nasıl Alınır?
 
 ### Google Gemini API (ANA AI MODELİ - ÜCRETSİZ) ⭐
 **Model:** Gemini 2.0 Flash (Ücretsiz)
@@ -190,14 +189,8 @@ docker-compose up -d
    GOOGLE_API_KEY=AIzaSy...your-actual-key...
    ```
 
-**Özellikler:**
-- ✅ Tamamen ÜCRETSIZ (aylık 1500 request)
-- ✅ GPT-4 seviyesinde performans
-- ✅ Mükemmel Türkçe desteği
-- ✅ Hızlı yanıt süresi (Flash model)
-- ✅ Google hesabı ile 2 dakikada key alırsınız
 
-### Tavily API (Web Arama - Opsiyonel)
+### Tavily API (Web Arama)
 1. https://tavily.com adresine gidin
 2. Ücretsiz hesap oluşturun (email ile)
 3. API key alın
@@ -210,39 +203,16 @@ docker-compose up -d
 
 ---
 
-## 📁 Proje Yapısı
 
-```
-proje/
-├── api/                    # Backend (FastAPI)
-│   ├── main.py            # Ana uygulama
-│   ├── routers/           # API endpoint'leri
-│   │   ├── auth.py        # Kimlik doğrulama
-│   │   └── chatbot.py     # AI chatbot
-│   ├── services/          # İş mantığı
-│   │   └── rag_chatbot.py # RAG chatbot servisi
-│   ├── .env.example       # Environment örneği
-│   └── requirements.txt   # Python bağımlılıkları
-│
-├── frontend/              # Frontend (React + Vite)
-│   ├── src/
-│   │   ├── pages/         # Sayfalar
-│   │   ├── components/    # UI bileşenleri
-│   │   └── services/      # API servisleri
-│   └── package.json       # Node bağımlılıkları
-│
-├── docker-compose.yml     # Docker yapılandırması
-└── README.md             # Bu dosya
-```
 
 ---
 
-## 🎯 Özellikler
+##  Özellikler
 
 - ✅ **AI Chatbot**: ZhipuAI GLM / Google Gemini destekli akıllı sohbet
 - ✅ **Web Arama**: Tavily API ile güncel bilgi erişimi
 - ✅ **Kimlik Doğrulama**: JWT tabanlı güvenli giriş
-- ✅ **Veritabanı**: SQLite (varsayılan) / PostgreSQL (Docker)
+- ✅ **Veritabanı**:PostgreSQL 
 - ✅ **Modern UI**: React + Vite + Tailwind CSS + shadcn/ui
 - ✅ **API Dokümantasyonu**: Swagger UI
 
@@ -251,6 +221,7 @@ proje/
 ## 🛠️ Teknolojiler
 
 **Backend:**
+- PySpark
 - FastAPI
 - SQLAlchemy
 - JWT Authentication
@@ -265,54 +236,7 @@ proje/
 - shadcn/ui
 
 **Database:**
-- SQLite (development)
-- PostgreSQL (production)
-
-**AI:**
-- Google Gemini 2.0 Flash (Main AI Engine)
-- Tavily Web Search (Optional - Real-time data)
-
----
-
-## 📖 API Endpoint'leri
-
-### Authentication
-- `POST /auth/register` - Yeni kullanıcı kaydı
-- `POST /auth/login` - Kullanıcı girişi
-- `GET /auth/me` - Mevcut kullanıcı bilgisi
-
-### Chatbot
-- `POST /api/chatbot/chat` - AI ile sohbet
-- `GET /api/chatbot/health` - Chatbot durumu
-- `POST /api/chatbot/competitor-analysis` - Rakip analizi
-
-### Health Check
-- `GET /health` - Sistem sağlık kontrolü
-- `GET /db-test` - Veritabanı bağlantı testi
-
----
-
-## 🔧 Geliştirme
-
-### Backend Geliştirme
-```bash
-cd api
-source venv/bin/activate
-python main.py 8000
-```
-
-### Frontend Geliştirme
-```bash
-cd frontend
-npm run dev
-```
-
-### Linting
-```bash
-# Frontend
-cd frontend
-npm run lint
-```
+- PostgreSQL 
 
 ---
 
@@ -335,64 +259,4 @@ docker-compose up -d
 
 ---
 
-## 📝 Environment Değişkenleri
-
-Tüm environment değişkenlerini görmek için:
-- `api/.env.example` dosyasına bakın
-
----
-
-## ❓ Sorun Giderme
-
-### Chatbot "Offline Mode" diyor
-- `.env` dosyasında geçerli bir API key olduğundan emin olun
-- Backend'i yeniden başlatın
-
-### CORS Hatası
-- Frontend ve Backend URL'lerinin `.env` içinde doğru olduğundan emin olun
-- Tarayıcı cache'ini temizleyin (Ctrl+Shift+Delete)
-
-### Port Zaten Kullanımda
-```bash
-# Port'u kullanan process'i bulun
-lsof -i :8000  # Backend
-lsof -i :8081  # Frontend
-
-# Process'i sonlandırın
-kill -9 <PID>
-```
-
-### Port Çakışması
-- **Backend:** Port 8000 (varsayılan)
-- **Frontend:** Port 8081 veya 5173 (Vite varsayılanı)
-- Eğer port çakışması yaşıyorsanız, backend'i farklı bir portta başlatabilirsiniz:
-  ```bash
-  python main.py 9000  # 9000 portunda başlatır
-  ```
-
----
-
-## 📄 Lisans
-
-Bu proje eğitim amaçlıdır.
-
----
-
-## 🤝 Katkıda Bulunma
-
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Commit edin (`git commit -m 'Add amazing feature'`)
-4. Push edin (`git push origin feature/amazing-feature`)
-5. Pull Request açın
-
----
-
-## 📧 İletişim
-
-Sorularınız için issue açabilirsiniz.
-
----
-
-**⭐ Projeyi beğendiyseniz yıldız vermeyi unutmayın!**
 
