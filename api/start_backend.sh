@@ -41,5 +41,5 @@ echo "=================================="
 echo ""
 
 # Backend'i başlat
-python main.py $PORT
+python main.py --port $PORT
 

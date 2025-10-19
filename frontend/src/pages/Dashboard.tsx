@@ -26,7 +26,8 @@ import {
   Users, 
   TrendingDown, 
   TrendingUp, 
-  AlertTriangle, 
+  AlertTriangle,
+  Network, 
   Shield, 
   BarChart3,
   MessageSquare,
@@ -175,10 +176,16 @@ const Dashboard = () => {
                   AI Asistan
                 </Button>
               </Link>
-              <Link to="/simulation">
+              <Link to="/agent-modeling">
                 <Button variant="ghost" size="sm">
                   <Play className="w-4 h-4 mr-2" />
-                  Simülasyon
+                  Agent-Based Modeling
+                </Button>
+              </Link>
+              <Link to="/agent-modeling">
+                <Button variant="ghost" size="sm">
+                  <Network className="w-4 h-4 mr-2" />
+                  Agent Modeling
                 </Button>
               </Link>
             </div>
@@ -559,10 +566,16 @@ const Dashboard = () => {
                     AI Asistan
                   </Button>
                 </Link>
-                <Link to="/simulation" className="block">
+                <Link to="/agent-modeling" className="block">
                   <Button variant="neural" className="w-full justify-start text-sm">
                     <Play className="w-4 h-4 mr-2" />
-                    Simülasyon
+                    Agent-Based Modeling
+                  </Button>
+                </Link>
+                <Link to="/agent-modeling" className="block">
+                  <Button variant="neural" className="w-full justify-start text-sm">
+                    <Network className="w-4 h-4 mr-2" />
+                    Agent Modeling
                   </Button>
                 </Link>
               </CardContent>

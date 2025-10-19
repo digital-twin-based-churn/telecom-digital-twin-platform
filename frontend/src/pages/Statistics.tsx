@@ -108,10 +108,10 @@ const Statistics = () => {
                   AI Asistan
                 </Button>
               </Link>
-              <Link to="/simulation">
+              <Link to="/agent-modeling">
                 <Button variant="ghost" size="sm">
                   <Play className="w-4 h-4 mr-2" />
-                  Simülasyon
+                  Agent-Based Modeling
                 </Button>
               </Link>
             </div>

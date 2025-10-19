@@ -37,7 +37,10 @@ import {
   ChevronDown,
   Calculator,
   User,
-  Megaphone
+  Megaphone,
+  Brain,
+  MessageCircle,
+  RefreshCw
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
@@ -77,6 +80,11 @@ const RiskAnalysis = () => {
   const [churnResult, setChurnResult] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   
+  // Why question states
+  const [whyQuestion, setWhyQuestion] = useState("")
+  const [whyAnswer, setWhyAnswer] = useState<any>(null)
+  const [isAskingWhy, setIsAskingWhy] = useState(false)
+  
   // Risk calculation
   const [riskScore, setRiskScore] = useState(0)
   const [riskLevel, setRiskLevel] = useState("Düşük")
@@ -105,6 +113,107 @@ const RiskAnalysis = () => {
       ...prev,
       [field]: value
     }))
+  }
+
+  // Handle "Why" questions about model predictions
+  const handleWhyQuestion = async () => {
+    if (!whyQuestion.trim() || !churnResult) return
+    
+    setIsAskingWhy(true)
+    try {
+      // Prepare customer data from form - Gerçek test senaryolarından feature'lar
+      const customerData = {
+        age: churnForm.age,
+        tenure: churnForm.tenure,
+        service_type: churnForm.service_type,
+        monthly_charge: churnForm.monthly_charge,
+        data_usage: churnForm.data_usage,
+        customer_support_calls: churnForm.customer_support_calls,
+        satisfaction_score: churnForm.satisfaction_score,
+        avg_call_duration: churnForm.avg_call_duration,
+        call_drops: churnForm.call_drops,
+        roaming_usage: churnForm.roaming_usage,
+        auto_payment: churnForm.auto_payment ? 1 : 0,
+        overdue_payments: churnForm.overdue_payments,
+        avg_top_up_count: churnForm.avg_top_up_count
+      }
+      
+      // Call real XAI API to get model explanations
+      const xaiResponse = await apiService.getXAIExplanation(whyQuestion, churnResult, customerData)
+      
+      const whyResponse = {
+        question: whyQuestion,
+        answer: xaiResponse,
+        timestamp: new Date()
+      }
+      
+      setWhyAnswer(whyResponse)
+    } catch (error) {
+      console.error('XAI API error:', error)
+      // Fallback to local explanation if API fails
+      const whyResponse = {
+        question: whyQuestion,
+        answer: generateWhyAnswer(whyQuestion, churnResult),
+        timestamp: new Date()
+      }
+      setWhyAnswer(whyResponse)
+    } finally {
+      setIsAskingWhy(false)
+    }
+  }
+
+  // Generate contextual "why" answers based on the churn result
+  const generateWhyAnswer = (question: string, result: any) => {
+    const lowerQuestion = question.toLowerCase()
+    const churnProb = Math.round(result.churn_probability * 100)
+    const isChurn = result.churn_prediction
+    
+    if (lowerQuestion.includes('neden') || lowerQuestion.includes('niçin') || lowerQuestion.includes('why')) {
+      return {
+        type: "explanation",
+        content: `Model bu tahmini yaparken şu faktörleri değerlendirdi:\n\n` +
+                `• Müşteri: ${churnForm.age} yaş, ${churnForm.tenure} aylık müşteri\n` +
+                `• Kullanım: ${churnForm.data_usage}GB veri, ${churnForm.avg_call_duration}dk arama\n` +
+                `• Finans: ${churnForm.monthly_charge}TL ücret, ${churnForm.overdue_payments} geciken ödeme\n` +
+                `• Etkileşim: ${churnForm.customer_support_calls} destek çağrısı, ${churnForm.satisfaction_score}/5 memnuniyet\n\n` +
+                `Bu faktörlerin kombinasyonu sonucunda model %${churnProb} churn olasılığı tahmin etti.`,
+        confidence: result.churn_probability
+      }
+    }
+    
+    if (lowerQuestion.includes('güven') || lowerQuestion.includes('confidence')) {
+      return {
+        type: "confidence",
+        content: `Model bu tahmin için %${churnProb} güven seviyesi bildiriyor.\n\n` +
+                `• Veri Kalitesi: ${churnForm.auto_payment ? 'Otomatik ödeme aktif' : 'Manuel ödeme'} - ${churnForm.auto_payment ? 'Güvenilir' : 'Riskli'}\n` +
+                `• Model: ${result.model_used} kullanıldı\n` +
+                `• Memnuniyet: ${churnForm.satisfaction_score >= 4 ? 'Yüksek' : churnForm.satisfaction_score >= 3 ? 'Orta' : 'Düşük'}\n\n` +
+                `Bu güven seviyesi, modelin bu tahminin doğru olma olasılığının ${churnProb > 70 ? 'yüksek' : churnProb > 40 ? 'orta' : 'düşük'} olduğunu gösteriyor.`,
+        confidence: result.churn_probability
+      }
+    }
+    
+    if (lowerQuestion.includes('yanlış') || lowerQuestion.includes('hata') || lowerQuestion.includes('error')) {
+      return {
+        type: "uncertainty",
+        content: `Model tahminlerinde belirsizlik faktörleri:\n\n` +
+                `• Veri Eksikliği: Bazı özellikler eksik olabilir\n` +
+                `• Değişen Koşullar: Pazar koşulları değişebilir\n` +
+                `• Model Sınırları: ${result.model_used} modeli mükemmel değildir\n` +
+                `• Müşteri Davranışı: Beklenmedik yaşam olayları\n\n` +
+                `Bu nedenle tahminleri sürekli izlemek önemlidir.`,
+        confidence: result.churn_probability
+      }
+    }
+    
+    // Default answer
+    return {
+      type: "general",
+      content: `Model bu tahmini yaparken müşteri profilini analiz etti. ` +
+              `${isChurn ? 'Yüksek churn riski' : 'Düşük churn riski'} tespit edildi. ` +
+              `Bu analiz sonucunda %${churnProb} churn olasılığı tahmin edildi.`,
+      confidence: result.churn_probability
+    }
   }
 
   // Calculate risk score based on inputs
@@ -279,10 +388,10 @@ const RiskAnalysis = () => {
                   AI Asistan
                 </Button>
               </Link>
-              <Link to="/simulation">
+              <Link to="/agent-modeling">
                 <Button variant="ghost" size="sm">
                   <Play className="w-4 h-4 mr-2" />
-                  Simülasyon
+                  Agent-Based Modeling
                 </Button>
               </Link>
             </div>
@@ -312,9 +421,9 @@ const RiskAnalysis = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-4 gap-6">
           {/* Input Form */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <Card className="animate-fade-up">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -643,6 +752,116 @@ const RiskAnalysis = () => {
               </CardContent>
             </Card>
 
+            {/* Why Question Section - Below the main form area */}
+            {churnResult && (
+              <Card className="animate-fade-up border-2 border-orange-200 dark:border-orange-800 bg-gradient-to-br from-orange-50/50 to-yellow-50/50 dark:from-orange-900/20 dark:to-yellow-900/20">
+                <CardHeader className="text-center pb-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full mb-3">
+                    <MessageCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
+                    LIME XAI: "Neden Böyle Tahmin Yaptı?"
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    LIME (Local Interpretable Model-agnostic Explanations) ile model tahminini sorgulayın
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex space-x-2">
+                    <Input
+                      value={whyQuestion}
+                      onChange={(e) => setWhyQuestion(e.target.value)}
+                      placeholder="Örn: Neden bu müşteri için yüksek churn riski tahmin ettiniz?"
+                      className="flex-1 border-orange-200 dark:border-orange-800 focus:border-orange-500 focus:ring-orange-500/20"
+                    />
+                    <Button 
+                      onClick={handleWhyQuestion}
+                      disabled={!whyQuestion.trim() || isAskingWhy}
+                      className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-semibold px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                    >
+                      {isAskingWhy ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Soruluyor...
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Sor
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {/* Quick Why Questions */}
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setWhyQuestion("Neden bu müşteri için yüksek churn riski tahmin ettiniz?")}
+                      className="text-xs h-8 bg-orange-50/80 hover:bg-orange-100/80 dark:bg-orange-900/20 dark:hover:bg-orange-900/30 border-orange-200/60 dark:border-orange-800/60 text-orange-700 dark:text-orange-300 rounded-lg"
+                    >
+                      Neden yüksek risk?
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setWhyQuestion("Bu tahminin güvenilirliği ne kadar?")}
+                      className="text-xs h-8 bg-orange-50/80 hover:bg-orange-100/80 dark:bg-orange-900/20 dark:hover:bg-orange-900/30 border-orange-200/60 dark:border-orange-800/60 text-orange-700 dark:text-orange-300 rounded-lg"
+                    >
+                      Güvenilirlik?
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setWhyQuestion("Hangi faktörler en çok etkili oldu?")}
+                      className="text-xs h-8 bg-orange-50/80 hover:bg-orange-100/80 dark:bg-orange-900/20 dark:hover:bg-orange-900/30 border-orange-200/60 dark:border-orange-800/60 text-orange-700 dark:text-orange-300 rounded-lg"
+                    >
+                      En etkili faktörler?
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setWhyQuestion("Bu tahmin yanlış olabilir mi?")}
+                      className="text-xs h-8 bg-orange-50/80 hover:bg-orange-100/80 dark:bg-orange-900/20 dark:hover:bg-orange-900/30 border-orange-200/60 dark:border-orange-800/60 text-orange-700 dark:text-orange-300 rounded-lg"
+                    >
+                      Yanlış olabilir mi?
+                    </Button>
+                  </div>
+
+                  {/* LIME Answer - Enhanced with LIME results */}
+                  {whyAnswer && (
+                    <div className="mt-4 space-y-4">
+                      {/* Main LIME Explanation */}
+                      <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg border-2 border-green-200 dark:border-green-800 shadow-sm">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Brain className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
+                              LIME Analizi
+                            </h4>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                              {whyAnswer.answer.explanation || whyAnswer.answer.content}
+                            </p>
+                            {whyAnswer.answer.confidence && (
+                              <div className="mt-2 flex items-center space-x-2">
+                                <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
+                                  LIME Güven: %{Math.round(whyAnswer.answer.confidence * 100)}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
           </div>
 
           {/* Risk Results Sidebar */}
@@ -837,9 +1056,78 @@ const RiskAnalysis = () => {
                       </p>
                     </div>
                   </div>
+
                 </CardContent>
               </Card>
             )}
+
+            {/* LIME Analysis Cards */}
+            {whyAnswer && (
+              <div className="space-y-4">
+                {/* LIME Feature Importance */}
+                {whyAnswer.answer.feature_importance && whyAnswer.answer.feature_importance.length > 0 && (
+                  <Card className="animate-slide-in-right border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center space-x-2 text-blue-800 dark:text-blue-200">
+                        <BarChart3 className="w-4 h-4" />
+                        <span className="text-sm">LIME Özellik Önem Sıralaması</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-2">
+                        {whyAnswer.answer.feature_importance.slice(0, 3).map((feature: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <div className="flex items-center space-x-2">
+                              <span className="w-5 h-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
+                                {index + 1}
+                              </span>
+                              <span className="text-xs font-medium text-blue-800 dark:text-blue-200 truncate">
+                                {feature.feature}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-xs font-semibold text-blue-600">
+                                {feature.value}
+                              </span>
+                              <p className="text-xs text-blue-500">
+                                {feature.impact}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* LIME Reasoning Steps */}
+                {whyAnswer.answer.reasoning_steps && whyAnswer.answer.reasoning_steps.length > 0 && (
+                  <Card className="animate-slide-in-right border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-900/20 dark:to-pink-900/20">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center space-x-2 text-purple-800 dark:text-purple-200">
+                        <Brain className="w-4 h-4" />
+                        <span className="text-sm">LIME Analiz Adımları</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-2">
+                        {whyAnswer.answer.reasoning_steps.map((step: string, index: number) => (
+                          <div key={index} className="flex items-start space-x-2">
+                            <span className="w-4 h-4 bg-purple-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                              {index + 1}
+                            </span>
+                            <span className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                              {step}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
       </div>

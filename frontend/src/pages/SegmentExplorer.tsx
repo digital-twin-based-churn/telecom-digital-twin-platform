@@ -239,7 +239,7 @@ const SegmentExplorer = () => {
               </DropdownMenu>
               
               <Link to="/chatbot"><Button variant="ghost" size="sm"><MessageSquare className="w-4 h-4 mr-2" />AI Asistan</Button></Link>
-              <Link to="/simulation"><Button variant="ghost" size="sm"><Play className="w-4 h-4 mr-2" />Simülasyon</Button></Link>
+              <Link to="/agent-modeling"><Button variant="ghost" size="sm"><Play className="w-4 h-4 mr-2" />Agent-Based Modeling</Button></Link>
             </div>
           </div>
 

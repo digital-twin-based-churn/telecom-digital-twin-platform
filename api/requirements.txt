@@ -46,3 +46,18 @@ aiohttp>=3.9.1
 # Web Search (Optional but Recommended)
 # ===========================================
 tavily-python>=0.7.0
+
+# ===========================================
+# XAI - Explainable AI Libraries (LIME)
+# ===========================================
+# LIME for local interpretable model explanations
+numpy>=1.24.4
+pandas>=2.0.0
+scikit-learn>=1.3.0
+lime>=0.2.0.1
+joblib>=1.3.0
+
+# ===========================================
+# Agent-Based Modeling
+# ===========================================
+networkx>=3.0

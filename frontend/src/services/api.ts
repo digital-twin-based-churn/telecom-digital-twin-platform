@@ -298,6 +298,69 @@ class ApiService {
       body: JSON.stringify(data),
     });
   }
+
+  // XAI API methods
+  async getXAIExplanation(question: string, churnResult: any, customerData: any): Promise<any> {
+    return await this.request('/api/xai/explain', {
+      method: 'POST',
+      body: JSON.stringify({
+        question,
+        churn_result: churnResult,
+        customer_data: customerData
+      }),
+    });
+  }
+
+  async getFeatureImportance(): Promise<any> {
+    return await this.request('/api/xai/feature-importance', {
+      method: 'GET',
+    });
+  }
+
+  async getModelInsights(): Promise<any> {
+    return await this.request('/api/xai/model-insights', {
+      method: 'GET',
+    });
+  }
+
+  async getSHAPValues(customerId: string): Promise<any> {
+    return await this.request(`/api/xai/shap-values/${customerId}`, {
+      method: 'GET',
+    });
+  }
+
+  async getLIMEExplanation(customerId: string): Promise<any> {
+    return await this.request(`/api/xai/lime-explanation/${customerId}`, {
+      method: 'GET',
+    });
+  }
+
+  // Generic HTTP methods
+  async get(endpoint: string): Promise<any> {
+    return await this.request(endpoint, {
+      method: 'GET',
+    });
+  }
+
+  async post(endpoint: string, data?: any): Promise<any> {
+    return await this.request(endpoint, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async put(endpoint: string, data?: any): Promise<any> {
+    return await this.request(endpoint, {
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async delete(endpoint: string): Promise<any> {
+    return await this.request(endpoint, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const apiService = new ApiService();

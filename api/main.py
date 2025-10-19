@@ -10,7 +10,7 @@ load_dotenv()
 
 from database import get_db, engine
 from models import Base
-from routers import auth, chatbot, analytics, digital_twin
+from routers import auth, chatbot, analytics, digital_twin, xai, agent_modeling, telecom_agent_modeling
 
 try:
     Base.metadata.create_all(bind=engine)
@@ -166,6 +166,12 @@ app.include_router(auth.router)
 app.include_router(chatbot.router)
 app.include_router(analytics.router)
 app.include_router(digital_twin.router)
+app.include_router(xai.router)
+app.include_router(agent_modeling.router)
+app.include_router(telecom_agent_modeling.router)
+
+print("✅ All routers included successfully!")
+print(f"✅ Telecom Agent Modeling router: {telecom_agent_modeling.router}")
 
 
 if __name__ == "__main__":

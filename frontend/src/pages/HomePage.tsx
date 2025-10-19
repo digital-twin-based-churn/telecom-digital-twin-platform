@@ -72,8 +72,8 @@ const HomePage = () => {
             <Link to="/chatbot" className="text-sm font-medium hover:text-blue-600 transition-colors">
               AI Asistan
             </Link>
-            <Link to="/simulation" className="text-sm font-medium hover:text-blue-600 transition-colors">
-              Simülasyon
+            <Link to="/agent-modeling" className="text-sm font-medium hover:text-blue-600 transition-colors">
+              Agent-Based Modeling
             </Link>
           </div>
 
@@ -178,10 +178,10 @@ const HomePage = () => {
                       Dashboard'a Git
                     </Button>
                   </Link>
-                  <Link to="/simulation">
+                  <Link to="/agent-modeling">
                     <Button size="lg" variant="outline" className="text-lg px-8 h-12 border-blue-200 hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
                       <Eye className="w-5 h-5 mr-2" />
-                      Simülasyon İncele
+                      Agent-Based Modeling
                     </Button>
                   </Link>
                 </>
@@ -193,10 +193,10 @@ const HomePage = () => {
                       Demo Başlat
                     </Button>
                   </Link>
-                  <Link to="/simulation">
+                  <Link to="/agent-modeling">
                     <Button size="lg" variant="outline" className="text-lg px-8 h-12 border-blue-200 hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
                       <Eye className="w-5 h-5 mr-2" />
-                      Simülasyon İncele
+                      Agent-Based Modeling
                     </Button>
                   </Link>
                 </>
