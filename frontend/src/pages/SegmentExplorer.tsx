@@ -185,10 +185,10 @@ const SegmentExplorer = () => {
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <Link to="/" className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
-                  <Signal className="w-6 h-6 text-primary-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                  <Signal className="w-6 h-6 text-white" />
                 </div>
-              <span className="text-xl font-bold">Dijital İkiz Platformu</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Dijital İkiz Platformu</span>
             </Link>
             
             <div className="hidden md:flex items-center space-x-1">

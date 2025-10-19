@@ -34,7 +34,8 @@ import {
   LogOut,
   ChevronDown,
   Calculator,
-  Megaphone
+  Megaphone,
+  Signal
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
@@ -129,10 +130,10 @@ const Customer360 = () => {
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
-                <Bot className="w-6 h-6 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                <Signal className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold">TelecomAI</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Dijital İkiz</span>
             </Link>
             
             <div className="hidden md:flex items-center space-x-1">
