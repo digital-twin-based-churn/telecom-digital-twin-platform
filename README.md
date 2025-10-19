@@ -1,8 +1,117 @@
-# 🌐 Telekomünikasyon Dijital İkiz Platformu
+# Dijital İkiz Tabanlı Churn Önleme Sistemi
 
 AI destekli telekomünikasyon sektörü için dijital ikiz platformu. Müşteri analizi, ağ optimizasyonu ve kampanya simülasyonu özellikleri.
 
-## 🚀 Hızlı Başlangıç
+
+##  Proje Özeti: 
+Telekomünikasyon sektöründe müşteri kaybı (churn), şirketlerin kârlılığını doğrudan etkileyen en kritik sorunlardan biridir.
+Bu proje, yalnızca müşterilerin ayrılma olasılığını tahmin etmekle kalmaz; her abone için kişiselleştirilmiş bir dijital ikiz (digital twin) oluşturarak, farklı pazarlama stratejilerini bu sanal modeller üzerinde simüle eder.Böylece, gerçek müşteriler üzerinde uygulanmadan önce her stratejinin etkisi test edilebilir, risk azaltılır ve pazarlama kaynakları en verimli şekilde kullanılır.
+
+##  Proje Amacı:
+telekom operatörlerinin müşteri sadakatini artırmasını, hedefli kampanyalar geliştirmesini ve gelir kaybını önlemesini sağlamayı amaçlar.
+Dijital ikiz yaklaşımıyla her müşterinin geçmiş davranışları, kullanım alışkanlıkları ve etkileşim geçmişi analiz edilir.
+Bu sayede sistem yalnızca “kim ayrılabilir”i değil, aynı zamanda “neden ayrılabilir” ve “nasıl tutulabilir” sorularına da yanıt verir.
+
+##  Sistem Mimarisi: 
+### 1️⃣ Veri KAYNAGI
+Her bir dosyada 1 milyon veri vardır toplamda 10 milyon veri ile çalışılmıştır.
+https://drive.google.com/drive/folders/1eCzX_xP4rxu8pmYO0lFQI4X0rQyk8R-V?usp=drive_link
+
+### Features
+
+* **id**: Müşteri IDsi
+* **age**: Müşterinin yaşı
+* **tenure**: Müşterinin operatörde geçirdiği toplam süre (ay cinsinden)
+* **service_type**: Ön Ödemeli, Peşin Ödemeli veya Geniş Bant internet müşterisi
+* **avg_call_duration**: Ortalama sesli görüşme süresi (saniye)
+* **data_usage**: GB Upload + Download
+* **roaming_usage**: Ortalama roaming sesli görüşme süresi
+* **monthly_charge**: Aylık ortalama fatura
+* **overdue_payments**: Ödemesi geçen fatura adedi
+* **auto_payment**: Otomatik ödeme talimatı
+* **avg_top_up_count**: Ön yüklemeli abone için aylık yükleme sayısı ortalaması
+* **call_drops**: Şebekede yaşadığı sesli görüşme kesilmesi
+* **customer_support_calls**: Toplam çağrı merkezi araması
+* **satisfaction_score**: Müşteri çağrı merkezi değerlendirme skoru
+* **apps**: Müşterinin kullandığı diğer servislerimiz
+    * İzleGo
+    * RitimGo
+    * CüzdanX
+    * HızlıPazar
+    * Konuşalım
+* **churn**: bool
+
+Projemizde kullanılan veri kümesi, her satırda bağımsız bir JSON nesnesi içeren Json Line (JSONL) formatında yapılandırılmıştır. Bu format, özellikle milyonlarca kayıttan oluşan büyük veri setlerinde yüksek performans sağlamıştır; çünkü her satır ayrı bir JSON nesnesi olarak saklandığından, veriler dağıtık sistemlerde paralel olarak işlenebilmiştir.
+Bu yapı sayesinde PySpark ile veriler tek bir makineye yüklenmeden, birden fazla çekirdek veya işlemci üzerinde parçalı (distributed) okuma işlemi gerçekleştirilmiştir. Böylece veri okuma süresi önemli ölçüde kısaltılmış, bellek kullanımı optimize edilmiş ve büyük hacimli verilerin verimli bir şekilde işlenmesi sağlanmıştır.
+
+Veri analizine başlandığında, genel churn (abonelik iptali) oranının %0.133 olduğu belirlenmiştir. Bu oldukça düşük bir oran olup, veri setinin doğası gereği dengesiz (imbalanced) bir yapıda olduğunu görmekteyiz.Aynı dengesizlik, service türlerinde de vardır.
+Prepaid müşterilerinde churn oranı %1.87,
+Broadband müşterilerinde %0.286,
+Postpaid müşterilerinde %1.85 olarak hesaplanmıştır.
+
+### 2️⃣  Feature Selection
+
+Her özellik (feature), tüm hizmet türleri (service type) için aynı derecede anlamlı değildir. Telekomünikasyon sektöründe müşterilerin davranışları, kullandıkları hizmet türüne göre önemli farklılıklar göstermektedir.
+Bu nedenle, modelleme sürecinde her service_type için yalnızca o segmente ait anlamlı ve etkili özellikler kullanılmış, ilişkisiz değişkenler bilinçli olarak veri setinden çıkarılmıştır.
+Örneğin, avg_top_up_count (ortalama yükleme sayısı) yalnızca Prepaid müşteriler için geçerlidir; çünkü faturalı (Postpaid) kullanıcılar yükleme işlemi yapmamaktadır.
+Benzer biçimde, auto_payment (otomatik ödeme talimatı) yalnızca Postpaid ve Broadband müşterilerde anlam taşımaktadır.
+Ayrıca, avg_call_duration, call_drops ve roaming_usage gibi sesli iletişim temelli değişkenler, sadece mobil hizmet kullanıcılarını temsil ettiği için Broadband segmentinde dikkate alınmamıştır.Buna karşılık, age, tenure, data_usage, satisfaction_score ve monthly_charge gibi genel davranışsal ve finansal göstergeler tüm segmentlerde ortak olarak kullanılmıştır.
+
+Sonuç olarak, özellik seçimi (feature selection) süreci, hem iş mantığına uygunluk (business relevancy) hem de istatistiksel katkı (predictive significance) dikkate alınarak optimize edilmiştir.
+Bu yaklaşım sayesinde her hizmet segmenti (Prepaid, Postpaid, Broadband) için oluşturulan modeller, kendi müşteri dinamiklerine uygun daha doğru, güvenilir ve açıklanabilir tahminler üretebilmiştir.
+
+
+Each feature is only relevant for a subset of **Service Type**. You can find the relevancy in following table.
+
+
+|                                      | Prepaid | Postpaid | Broadband |
+|--------------------------------------|:-------:|:--------:|:---------:|
+| app (as `size (app)`)                |    x    |    x     |     x     |
+| avg_call_duration                    |    x    |    x     |           |
+| avg_top_up_count                     |    x    |          |           |
+| call_drops                           |    x    |    x     |           |
+| roaming_usage                        |    x    |    x     |           |
+| auto_payment                         |         |    x     |     x     |
+| tenure                               |    x    |    x     |     x     |
+| age                                  |    x    |    x     |     x     |
+| customer_support_calls               |    x    |    x     |     x     |
+| satisfaction_score                   |    x    |    x     |     x     |
+| data_usage                           |    x    |    x     |     x     |
+| monthly_charge                       |    x    |    x     |     x     |
+| overdue_payments                     |         |    x     |     x     |
+| **churn** (Target, as `cast("int")`) |    x    |    x     |     x     |
+
+
+
+
+### 3️⃣   Model Training
+3 ayrı model kurulmuş olup detayını yazacagım.
+
+
+### 4️⃣ Model Evaluation
+
+
+### 5️⃣ Explainable AI / XAI
+LIME kullanılarak modelin nasıl yorumlandığını anltılıp.Her bir müşterinin churn kararına etki eden faktörleri gösterilmiştir.
+
+### 6️⃣ Agent-Based Dijital İkiz Modelleme
+Bu projede ki en yenilikçi yönü, her müşterinin geçmiş davranış verilerine dayanarak oluşturulan kişiselleştirilmiş dijital ikiz (Digital Twin) modelleridir. Dijital ikiz, gerçek bir müşterinin sanal bir yansıması olarak tasarlanmıştır ve o müşterinin geçmiş etkileşimlerini, hizmet kullanım alışkanlıklarını, finansal davranışlarını ve memnuniyet düzeylerini temsil eder. Bu yapı sayesinde sistem, gerçek müşteriye herhangi bir müdahalede bulunmadan önce, planlanan pazarlama stratejilerinin olası etkilerini bu dijital ikizler üzerinde test edebilmekte yani bir anlamda “sanal laboratuvar ortamı” oluşturmaktadır.
+
+Dijital İkiz Oluşturma: Bu profilden yola çıkarak, her müşteri için dinamik bir sanal temsilci (agent) oluşturulur. Dijital ikiz, müşterinin gelecekteki davranışlarını olasılıksal biçimde taklit eder. Örneğin, fiyat artışı, kampanya teklifi veya hizmet kalitesindeki değişim gibi durumlara nasıl tepki verebileceğini simüle eder. Simülasyon ve Strateji Testi: Geliştirilen Agent-Based Modeling (ABM) yapısı, bireysel müşteri ikizlerinin etkileşimlerini toplu düzeyde analiz eder. Böylece sistem, “bir kampanya değişikliği 10 bin müşteri üzerinde ne kadar etki yaratır?” gibi sorulara, gerçek veriye dayalı simülasyon sonuçlarıyla yanıt verebilir. Kampanya Optimizasyonu: Gerçek müşterilere kampanya uygulanmadan önce, farklı stratejiler bu ikizler üzerinde test edilir. Bu testler sonucunda, en yüksek memnuniyet – en düşük churn riski kombinasyonu seçilir.
+
+
+Bu projede sanal Laboratuvar mantığı yapısı oluşturulmuştur. Bu yapıyla da, telekom operatörleri için bir tür “deneme–yanılma yapılmadan karar verme sistemi” olarak çalışır. Her müşterinin dijital ikizi, gerçek sistemden izole edilmiş bir laboratuvar ortamında bulunur. Bu ortamda şirket, kampanya tekliflerini, fiyat değişimlerini veya hizmet iyileştirmelerini önce bu dijital ikizler üzerinde test eder. Gerçek müşteri memnuniyetini olumsuz etkilemeden, hangi stratejinin churn’ü azalttığı veya hangi grubun risk altında olduğu önceden tespit edilir. Bu sayede hem pazarlama bütçesi optimize edilmiş olunur.
+
+### 7️⃣ Telekominasyon Chatbot 
+
+Kullanıcıların sisteme doğal dilde sorular yöneltebildiği, churn tahminleri ve dijital ikiz senaryolarını sorgulayabildiği akıllı asistan modülüdür. RAG (Retrieval-Augmented Generation) mimarisiyle çalışır; veritabanından anlamca en ilgili bilgiyi getirir ve LLM  ile açıklamalı, doğal bir yanıt oluşturur. Bu yapı sayesinde kullanıcılar kod veya sorgu yazmadan, model çıktılarıyla etkileşime geçebilir.
+Telekomisyondaki rakiplerin sunduğu avantajlar scraping yapılarak çekilmiştir.Telekominnasyonla ilgili haberler,churn onleme stratejileri,sesli komut gibi özelliklerle genişletilmiştir.
+
+
+8️⃣...devam edilecek
+
+
+##  Hızlı Başlangıç
 
 ### 1️⃣ Environment Dosyasını Ayarlayın
 
