@@ -1,3 +1,10 @@
+
+http://34.76.26.71:8080/
+## ‼️ Giriş bilgileri
+MAİL: admin@example.com
+
+
+SIFRE: Admin123!
 # Dijital İkiz Tabanlı Churn Önleme Sistemi
 
 AI destekli telekomünikasyon sektörü için dijital ikiz platformu. Müşteri analizi, ağ optimizasyonu ve kampanya simülasyonu özellikleri.
@@ -200,21 +207,6 @@ docker-compose up -d
    ```
 
 **Not:** Web arama, güncel kampanya ve fiyat bilgileri için kullanılır.
-
----
-
-
-
----
-
-##  Özellikler
-
-- ✅ **AI Chatbot**: ZhipuAI GLM / Google Gemini destekli akıllı sohbet
-- ✅ **Web Arama**: Tavily API ile güncel bilgi erişimi
-- ✅ **Kimlik Doğrulama**: JWT tabanlı güvenli giriş
-- ✅ **Veritabanı**:PostgreSQL 
-- ✅ **Modern UI**: React + Vite + Tailwind CSS + shadcn/ui
-- ✅ **API Dokümantasyonu**: Swagger UI
 
 ---
 
