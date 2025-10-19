@@ -21,9 +21,10 @@ WORKDIR /app
 
 # Install Python deps first
 COPY GYK-capstone-project/data/requirements.txt /app/requirements.txt
+ENV PIP_ONLY_BINARY=:all:
 RUN python3 -m pip install --upgrade pip && \
-    pip install -r /app/requirements.txt && \
-    pip install pyspark==3.5.1
+    pip install --no-cache-dir -r /app/requirements.txt && \
+    pip install --no-cache-dir --prefer-binary pyspark==3.5.1
 
 # Copy service code and artifacts
 COPY GYK-capstone-project/svc /app/svc
