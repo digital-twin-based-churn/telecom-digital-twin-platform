@@ -1,10 +1,8 @@
 
-http://34.76.26.71:8080/
+https://churn-frontend-cm5h7yta6a-uc.a.run.app/
 ## ‼️ Giriş bilgileri
-MAİL: admin@example.com
-
-
-SIFRE: Admin123!
+MAİL: gy@turkcell.com.tr
+SIFRE: Gy123456
 # Dijital İkiz Tabanlı Churn Önleme Sistemi
 
 AI destekli telekomünikasyon sektörü için dijital ikiz platformu. Müşteri analizi, ağ optimizasyonu ve kampanya simülasyonu özellikleri.
